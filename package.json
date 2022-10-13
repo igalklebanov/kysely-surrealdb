@@ -1,0 +1,56 @@
+{
+  "name": "kysely-surrealdb",
+  "version": "0.1.0",
+  "description": "Kysely dialects, plugins and other goodies for SurrealDB",
+  "repository": "https://github.com/igalklebanov/kysely-surrealdb.git",
+  "homepage": "https://github.com/igalklebanov/kysely-surrealdb",
+  "author": "Igal Klebanov <igalklebanov@gmail.com>",
+  "license": "MIT",
+  "main": "./dist/cjs/index.js",
+  "module": "./dist/esm/index.js",
+  "exports": {
+    ".": {
+      "import": "./dist/esm/index.js",
+      "require": "./dist/cjs/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "keywords": [
+    "kysely",
+    "surrealdb",
+    "driver",
+    "dialect",
+    "plugin"
+  ],
+  "scripts": {
+    "build": "tsup && node ./scripts/dist-fix.js",
+    "clean": "rm -rf dist",
+    "fmt": "prettier --write .",
+    "fmt:check": "prettier --check .",
+    "lint": "eslint src --ext .ts",
+    "prepack": "pnpm run lint && pnpm run build"
+  },
+  "peerDependencies": {
+    "kysely": ">= 0.7.8 < 1"
+  },
+  "devDependencies": {
+    "@tsconfig/node16": "^1.0.3",
+    "@types/node": "^16",
+    "@typescript-eslint/eslint-plugin": "^5.38.0",
+    "@typescript-eslint/parser": "^5.38.0",
+    "eslint": "^8.24.0",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-plugin-import": "^2.26.0",
+    "eslint-plugin-prettier": "^4.2.1",
+    "kysely": "^0.22.0",
+    "prettier": "^2.7.1",
+    "prettier-plugin-organize-imports": "^3.1.1",
+    "prettier-plugin-pkg": "^0.17.1",
+    "tsup": "^6.2.3",
+    "typescript": "^4.8.4",
+    "undici": "^5.11.0"
+  },
+  "sideEffects": false
+}
