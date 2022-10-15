@@ -1,0 +1,8 @@
+export * from './dialect/errors.js'
+export * from './dialect/query-compiler.js'
+export * from './dialect/rest/rest-adapter.js'
+export * from './dialect/rest/rest-dialect.js'
+export * from './dialect/rest/rest-driver.js'
+export * from './dialect/rest/rest-errors.js'
+export * from './dialect/rest/rest-introspector.js'
+export type {FetchRequest, FetchResponse, SurrealDbRestDialectConfig} from './dialect/rest/rest-types.js'
