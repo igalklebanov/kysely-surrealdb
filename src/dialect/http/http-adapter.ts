@@ -2,7 +2,7 @@ import {DialectAdapterBase, type Kysely} from 'kysely'
 
 import {SurrealDbLocksUnsupportedError} from '../errors.js'
 
-export class SurrealDbRestAdapter extends DialectAdapterBase {
+export class SurrealDbHttpAdapter extends DialectAdapterBase {
   get supportsReturning(): boolean {
     return true
   }

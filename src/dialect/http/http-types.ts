@@ -1,4 +1,4 @@
-export interface SurrealDbRestDialectConfig {
+export interface SurrealDbHttpDialectConfig {
   /**
    * SurrealDB database name.
    */
@@ -53,39 +53,39 @@ export interface FetchResponse {
 /**
  * @see https://surrealdb.com/docs/integration/http#sql
  */
-export interface SurrealDbRestRequestHeaders extends Record<string, string> {
+export interface SurrealDbHttpRequestHeaders extends Record<string, string> {
   Accept: 'application/json'
   Authorization: `Basic ${string}`
   DB: string
   NS: string
 }
 
-export type SurrealDbRestResponseBody<R> = SurrealDbRestResponseBodyItem<R>[]
+export type SurrealDbHttpResponseBody<R> = SurrealDbHttpResponseBodyItem<R>[]
 
-export interface SurrealDbRestResponseBodyItem<R> {
+export interface SurrealDbHttpResponseBodyItem<R> {
   result: R
   status: 'OK'
   time: string
 }
 
-export type SurrealDbRestDmlResponseBodyItem<O> = SurrealDbRestResponseBodyItem<O[]>
+export type SurrealDbHttpDmlResponseBodyItem<O> = SurrealDbHttpResponseBodyItem<O[]>
 
-export type SurrealDbRestDdlResponseBodyItem = SurrealDbRestResponseBodyItem<null>
+export type SurrealDbHttpDdlResponseBodyItem = SurrealDbHttpResponseBodyItem<null>
 
-export type SurrealDbRestInfoForDbReponseBodyItem =
-  SurrealDbRestResponseBodyItem<SurrealDbRestInfoForDbResponseBodyItemResult>
+export type SurrealDbHttpInfoForDbReponseBodyItem =
+  SurrealDbHttpResponseBodyItem<SurrealDbHttpInfoForDbResponseBodyItemResult>
 
-export interface SurrealDbRestInfoForDbResponseBodyItemResult {
+export interface SurrealDbHttpInfoForDbResponseBodyItemResult {
   dl: Record<string, unknown>
   dt: Record<string, unknown>
   sc: Record<string, unknown>
   tb: Record<string, string>
 }
 
-export type SurrealDbRestInfoForTableResposeBodyItem =
-  SurrealDbRestResponseBodyItem<SurrealDbRestInfoForTableResponseBodyItemResult>
+export type SurrealDbHttpInfoForTableResposeBodyItem =
+  SurrealDbHttpResponseBodyItem<SurrealDbHttpInfoForTableResponseBodyItemResult>
 
-export interface SurrealDbRestInfoForTableResponseBodyItemResult {
+export interface SurrealDbHttpInfoForTableResponseBodyItemResult {
   ev: Record<string, unknown>
   fd: Record<string, string>
   ft: Record<string, unknown>

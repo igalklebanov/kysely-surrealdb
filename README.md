@@ -4,6 +4,8 @@
 
 [Kysely](https://github.com/koskimas/kysely) dialects, plugins and other goodies for [SurrealDB](https://www.surrealdb.com/).
 
+[SurrealQL](https://surrealdb.com/docs/surrealql) is based on SQL, so why not? :trollface:
+
 ## Installation
 
 #### NPM 7+
@@ -46,11 +48,45 @@ To fix that, add an [`import_map.json`](https://deno.land/manual@v1.26.1/linking
 
 ## Usage
 
-### Rest Dialect
+### HTTP Dialect
 
-TODO: ...
+[SurrealDB](https://www.surrealdb.com/)'s [HTTP endpoints](https://surrealdb.com/docs/integration/http) allows executing [SurrealQL](https://surrealdb.com/docs/surrealql) queries in the browser and is a great fit for serverless functions and other auto-scaling compute services.
 
-### "Classic" Dialect - Soon<sup>TM</sup>
+#### Node.js 16.8+
+
+Older node versions are supported as well, just swap [`undici`](https://github.com/nodejs/undici) with [`node-fetch`](https://github.com/node-fetch/node-fetch).
+
+```ts
+import {Kysely} from 'kysely'
+import {SurrealDbHttpDialect} from 'kysely-surrealdb'
+import {fetch} from 'undici'
+
+interface Database {
+  person: {
+    id: string
+    first_name: string | null
+    last_name: string | null
+  }
+  pet: {
+    id: string
+    name: string
+    owner_id: string
+  }
+}
+
+const db = new Kysely<Database>({
+  dialect: new SurrealDbHttpDialect({
+    database: '<database>',
+    fetch,
+    hostname: '<hostname>',
+    namespace: '<namespace>',
+    password: '<password>',
+    username: '<username>',
+  }),
+})
+```
+
+### Web Socket Dialect - Soon<sup>TM</sup>
 
 ## License
 

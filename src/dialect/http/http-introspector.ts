@@ -10,12 +10,12 @@ import {
 
 import {SurrealDbSchemasUnsupportedError} from '../errors.js'
 import type {
-  SurrealDbRestInfoForDbResponseBodyItemResult,
-  SurrealDbRestInfoForTableResponseBodyItemResult,
-  SurrealDbRestResponseBodyItem,
-} from './rest-types.js'
+  SurrealDbHttpInfoForDbResponseBodyItemResult,
+  SurrealDbHttpInfoForTableResponseBodyItemResult,
+  SurrealDbHttpResponseBodyItem,
+} from './http-types.js'
 
-export class SurrealDbRestIntrospector implements DatabaseIntrospector {
+export class SurrealDbHttpIntrospector implements DatabaseIntrospector {
   readonly #db: Kysely<any>
 
   constructor(db: Kysely<any>) {
@@ -53,8 +53,8 @@ export class SurrealDbRestIntrospector implements DatabaseIntrospector {
 
   async #requestInfoFor<
     E extends RequestInfoForEntity,
-    R = E extends 'db' ? SurrealDbRestInfoForDbResponseBodyItemResult : SurrealDbRestInfoForTableResponseBodyItemResult,
-    I extends SurrealDbRestResponseBodyItem<R> = SurrealDbRestResponseBodyItem<R>,
+    R = E extends 'db' ? SurrealDbHttpInfoForDbResponseBodyItemResult : SurrealDbHttpInfoForTableResponseBodyItemResult,
+    I extends SurrealDbHttpResponseBodyItem<R> = SurrealDbHttpResponseBodyItem<R>,
   >(entity: E, name?: string): Promise<R> {
     try {
       const {
@@ -62,14 +62,14 @@ export class SurrealDbRestIntrospector implements DatabaseIntrospector {
       } = await sql<I>`info for ${sql.raw(entity)}${sql.raw(name ? ` ${name}` : '')}`.execute(this.#db)
 
       if (status !== 'OK') {
-        throw new SurrealDbRestIntrospectorError({entity, name, reason: status})
+        throw new SurrealDbHttpIntrospectorError({entity, name, reason: status})
       }
 
       return result
     } catch (error: unknown) {
       const reason = error instanceof Error ? error.message : typeof error === 'string' ? error : undefined
 
-      throw new SurrealDbRestIntrospectorError({entity, name, reason})
+      throw new SurrealDbHttpIntrospectorError({entity, name, reason})
     }
   }
 
@@ -80,7 +80,7 @@ export class SurrealDbRestIntrospector implements DatabaseIntrospector {
 
 type RequestInfoForEntity = 'kv' | 'db' | 'ns' | 'table'
 
-export class SurrealDbRestIntrospectorError extends Error {
+export class SurrealDbHttpIntrospectorError extends Error {
   constructor(incident: {entity: RequestInfoForEntity; name?: string; reason?: string}) {
     super(
       `Failed getting info for ${incident.entity}${incident.name ? `:${incident.name}` : ''}${

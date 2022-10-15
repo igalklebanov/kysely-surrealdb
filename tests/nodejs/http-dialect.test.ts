@@ -3,7 +3,7 @@ import {Kysely, type ColumnType, type GeneratedAlways} from 'kysely'
 import nodeFetch from 'node-fetch'
 import {fetch as undiciFetch} from 'undici'
 
-import {SurrealDbRestDialect, SurrealDbRestDialectConfig} from '../../src'
+import {SurrealDbHttpDialect, type SurrealDbHttpDialectConfig} from '../../src'
 
 interface Database {
   person: Person
@@ -34,7 +34,7 @@ interface Toy {
   pet_id: number
 }
 
-describe('SurrealDbRestDialect', () => {
+describe('SurrealDbHttpDialect', () => {
   let db: Kysely<Database>
 
   before(async () => {
@@ -53,9 +53,9 @@ describe('SurrealDbRestDialect', () => {
   })
 })
 
-function getDB(config?: Partial<SurrealDbRestDialectConfig>): Kysely<Database> {
+function getDB(config?: Partial<SurrealDbHttpDialectConfig>): Kysely<Database> {
   return new Kysely({
-    dialect: new SurrealDbRestDialect({
+    dialect: new SurrealDbHttpDialect({
       database: 'test',
       fetch: getFetch(),
       hostname: 'localhost:8000',

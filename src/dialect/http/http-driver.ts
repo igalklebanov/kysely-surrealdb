@@ -1,16 +1,16 @@
 import type {DatabaseConnection, Driver} from 'kysely'
 
 import {encodeToBase64} from '../../util/encode-to-base64.js'
-import {SurrealDbRestConnection} from './rest-connection.js'
-import {SurrealDbRestTransactionsUnsupportedError} from './rest-errors.js'
-import type {SurrealDbRestDialectConfig, SurrealDbRestRequestHeaders} from './rest-types.js'
+import {SurrealDbHttpConnection} from './http-connection.js'
+import {SurrealDbHttpTransactionsUnsupportedError} from './http-errors.js'
+import type {SurrealDbHttpDialectConfig, SurrealDbHttpRequestHeaders} from './http-types.js'
 
-export class SurrealDbRestDriver implements Driver {
+export class SurrealDbHttpDriver implements Driver {
   readonly #basePath: string
-  readonly #config: SurrealDbRestDialectConfig
-  readonly #requestHeaders: SurrealDbRestRequestHeaders
+  readonly #config: SurrealDbHttpDialectConfig
+  readonly #requestHeaders: SurrealDbHttpRequestHeaders
 
-  constructor(config: SurrealDbRestDialectConfig) {
+  constructor(config: SurrealDbHttpDialectConfig) {
     this.#config = config
     this.#basePath = this.#resolveBasePath()
     this.#requestHeaders = this.#createRequestHeaders()
@@ -21,7 +21,7 @@ export class SurrealDbRestDriver implements Driver {
   }
 
   async acquireConnection(): Promise<DatabaseConnection> {
-    return new SurrealDbRestConnection(this.#config, this.#basePath, this.#requestHeaders)
+    return new SurrealDbHttpConnection(this.#config, this.#basePath, this.#requestHeaders)
   }
 
   async beginTransaction(): Promise<never> {
@@ -51,7 +51,7 @@ export class SurrealDbRestDriver implements Driver {
     return `${protocol}://${hostname}`
   }
 
-  #createRequestHeaders(): SurrealDbRestRequestHeaders & Record<string, string> {
+  #createRequestHeaders(): SurrealDbHttpRequestHeaders & Record<string, string> {
     const decodedAuth = `${this.#config.username}:${this.#config.password}`
 
     const auth = encodeToBase64(decodedAuth)
@@ -65,6 +65,6 @@ export class SurrealDbRestDriver implements Driver {
   }
 
   #throwTransactionsError(): never {
-    throw new SurrealDbRestTransactionsUnsupportedError()
+    throw new SurrealDbHttpTransactionsUnsupportedError()
   }
 }

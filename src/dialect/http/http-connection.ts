@@ -1,15 +1,15 @@
 import type {CompiledQuery, DatabaseConnection, QueryResult} from 'kysely'
 
 import {SurrealDbMultipleStatementQueriesUnsupportedError} from '../errors.js'
-import {SurrealDbRestDatabaseError, SurrealDbRestStreamingUnsupportedError} from './rest-errors.js'
-import type {SurrealDbRestDialectConfig, SurrealDbRestRequestHeaders, SurrealDbRestResponseBody} from './rest-types.js'
+import {SurrealDbHttpDatabaseError, SurrealDbHttpStreamingUnsupportedError} from './http-errors.js'
+import type {SurrealDbHttpDialectConfig, SurrealDbHttpRequestHeaders, SurrealDbHttpResponseBody} from './http-types.js'
 
-export class SurrealDbRestConnection implements DatabaseConnection {
+export class SurrealDbHttpConnection implements DatabaseConnection {
   readonly #basePath: string
-  readonly #config: SurrealDbRestDialectConfig
-  readonly #requestHeaders: SurrealDbRestRequestHeaders
+  readonly #config: SurrealDbHttpDialectConfig
+  readonly #requestHeaders: SurrealDbHttpRequestHeaders
 
-  constructor(config: SurrealDbRestDialectConfig, basePath: string, requestHeaders: SurrealDbRestRequestHeaders) {
+  constructor(config: SurrealDbHttpDialectConfig, basePath: string, requestHeaders: SurrealDbHttpRequestHeaders) {
     this.#basePath = basePath
     this.#config = config
     this.#requestHeaders = requestHeaders
@@ -25,15 +25,15 @@ export class SurrealDbRestConnection implements DatabaseConnection {
     })
 
     if (!response.ok) {
-      throw new SurrealDbRestDatabaseError(await response.text())
+      throw new SurrealDbHttpDatabaseError(await response.text())
     }
 
     const responseBody = await response.json()
 
-    const {result, status} = (responseBody as SurrealDbRestResponseBody<O[]>).pop() || {}
+    const {result, status} = (responseBody as SurrealDbHttpResponseBody<O[]>).pop() || {}
 
     if (status !== 'OK') {
-      throw new SurrealDbRestDatabaseError(status)
+      throw new SurrealDbHttpDatabaseError(status)
     }
 
     return {
@@ -42,7 +42,7 @@ export class SurrealDbRestConnection implements DatabaseConnection {
   }
 
   async *streamQuery<O>(compiledQuery: CompiledQuery, chunkSize?: number): AsyncIterableIterator<QueryResult<O>> {
-    throw new SurrealDbRestStreamingUnsupportedError()
+    throw new SurrealDbHttpStreamingUnsupportedError()
   }
 
   #assertSingleStatementQuery(compiledQuery: CompiledQuery): void {
