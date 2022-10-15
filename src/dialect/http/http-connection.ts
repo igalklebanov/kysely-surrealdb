@@ -58,20 +58,6 @@ export class SurrealDbHttpConnection implements DatabaseConnection {
       return sql
     }
 
-    return [
-      ...parameters.map((parameter, index) => `let $${index + 1} = ${this.#serializeQueryParameter(parameter)}`),
-      sql,
-    ].join(';')
-  }
-
-  #serializeQueryParameter(parameter: unknown): string {
-    switch (typeof parameter) {
-      case 'string':
-        return `"${parameter}"`
-      case 'object':
-        return JSON.stringify(parameter)
-      default:
-        return String(parameter)
-    }
+    return [...parameters.map((parameter, index) => `let $${index + 1} = ${JSON.stringify(parameter)}`), sql].join(';')
   }
 }
