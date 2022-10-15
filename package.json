@@ -1,6 +1,6 @@
 {
   "name": "kysely-surrealdb",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Kysely dialects, plugins and other goodies for SurrealDB",
   "repository": "https://github.com/igalklebanov/kysely-surrealdb.git",
   "homepage": "https://github.com/igalklebanov/kysely-surrealdb",
