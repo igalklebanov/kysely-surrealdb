@@ -69,7 +69,7 @@ export class SurrealDbHttpConnection implements DatabaseConnection {
       case 'string':
         return `"${parameter}"`
       case 'object':
-        return !parameter ? 'null' : JSON.stringify(parameter)
+        return JSON.stringify(parameter)
       default:
         return String(parameter)
     }
