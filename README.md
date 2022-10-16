@@ -58,7 +58,44 @@ Older node versions are supported as well, just swap [`undici`](https://github.c
 
 ```ts
 import {Kysely} from 'kysely'
-import {SurrealDbHttpDialect} from 'kysely-surrealdb'
+import {SurrealDatabase, SurrealDbHttpDialect} from 'kysely-surrealdb'
+import {fetch} from 'undici'
+
+interface Database {
+  person: {
+    id: GeneratedAlways<string>
+    first_name: string | null
+    last_name: string | null
+    age: number
+  }
+  pet: {
+    id: GeneratedAlways<string>
+    name: string
+    owner_id: string | null
+  }
+}
+
+const db = new Kysely<SurrealDatabase<Database>>({
+  dialect: new SurrealDbHttpDialect({
+    database: '<database>',
+    fetch,
+    hostname: '<hostname>',
+    namespace: '<namespace>',
+    password: '<password>',
+    username: '<username>',
+  }),
+})
+```
+
+### Web Socket Dialect - Soon<sup>TM</sup>
+
+### SurrealKysely Query Builder
+
+The awesomeness of Kysely, with some SurrealQL query builders patched in.
+
+```ts
+import {Kysely} from 'kysely'
+import {SurrealDatabase, SurrealDbHttpDialect} from 'kysely-surrealdb'
 import {fetch} from 'undici'
 
 interface Database {
@@ -74,7 +111,7 @@ interface Database {
   }
 }
 
-const db = new Kysely<Database>({
+const db = new SurrealKysely<Database>({
   dialect: new SurrealDbHttpDialect({
     database: '<database>',
     fetch,
@@ -84,9 +121,16 @@ const db = new Kysely<Database>({
     username: '<username>',
   }),
 })
-```
 
-### Web Socket Dialect - Soon<sup>TM</sup>
+await db
+  .create('person:100')
+  .set({
+    first_name: 'Jennifer',
+    age: 15,
+  })
+  .return('none')
+  .execute()
+```
 
 ## License
 
