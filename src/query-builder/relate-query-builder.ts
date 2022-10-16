@@ -8,44 +8,43 @@ import {
   type QueryExecutor,
 } from 'kysely'
 
-import {CreateQueryNode} from '../operation-node/create-query-node.js'
+import {RelateQueryNode} from '../operation-node/relate-query-node.js'
 import {parseCreateObject, type CreateObject} from '../parser/create-set-parser.js'
 import {
   parseReturnExpression,
   type ExtractTypeFromReturnExpression,
   type ReturnExpression,
 } from '../parser/return-parser.js'
-import {preventAwait} from '../util/prevent-await.js'
 import type {QueryId} from '../util/query-id.js'
-import {MergePartial} from '../util/type-utils.js'
+import type {MergePartial} from '../util/type-utils.js'
 
-export class CreateQueryBuilder<DB, TB extends keyof DB, O> implements Compilable {
-  #props: CreateQueryBuilderProps
+export class RelateQueryBuilder<DB, TB extends keyof DB, O = DB[TB]> implements Compilable {
+  readonly #props: RelateQueryBuilderProps
 
-  constructor(props: CreateQueryBuilderProps) {
+  constructor(props: RelateQueryBuilderProps) {
     this.#props = props
   }
 
-  content<C extends CreateObject<DB, TB>>(content: C): CreateQueryBuilder<DB, TB, O & C> {
-    return new CreateQueryBuilder({
+  content<C extends CreateObject<DB, TB>>(content: C): RelateQueryBuilder<DB, TB, O & C> {
+    return new RelateQueryBuilder({
       ...this.#props,
-      queryNode: CreateQueryNode.cloneWithContent(this.#props.queryNode, ValueNode.create(content)),
+      queryNode: RelateQueryNode.cloneWithContent(this.#props.queryNode, ValueNode.create(content)),
     })
   }
 
-  set<V extends CreateObject<DB, TB>>(values: V): CreateQueryBuilder<DB, TB, O & V> {
-    return new CreateQueryBuilder({
+  set<V extends CreateObject<DB, TB>>(values: V): RelateQueryBuilder<DB, TB, O & V> {
+    return new RelateQueryBuilder({
       ...this.#props,
-      queryNode: CreateQueryNode.cloneWithSet(this.#props.queryNode, parseCreateObject(values)),
+      queryNode: RelateQueryNode.cloneWithSet(this.#props.queryNode, parseCreateObject(values)),
     })
   }
 
   return<RE extends ReturnExpression<DB, TB>>(
     expression: RE,
-  ): CreateQueryBuilder<DB, TB, ExtractTypeFromReturnExpression<DB, TB, RE>> {
-    return new CreateQueryBuilder({
+  ): RelateQueryBuilder<DB, TB, ExtractTypeFromReturnExpression<DB, TB, RE>> {
+    return new RelateQueryBuilder({
       ...this.#props,
-      queryNode: CreateQueryNode.cloneWithReturn(this.#props.queryNode, parseReturnExpression(expression)),
+      queryNode: RelateQueryNode.cloneWithReturn(this.#props.queryNode, parseReturnExpression(expression)),
     })
   }
 
@@ -55,13 +54,13 @@ export class CreateQueryBuilder<DB, TB extends keyof DB, O> implements Compilabl
 
   if<O2>(
     condition: boolean,
-    func: (qb: this) => CreateQueryBuilder<DB, TB, O2>,
-  ): CreateQueryBuilder<DB, TB, MergePartial<O, O2>> {
+    func: (qb: this) => RelateQueryBuilder<DB, TB, O2>,
+  ): RelateQueryBuilder<DB, TB, MergePartial<O, O2>> {
     if (condition) {
       return func(this) as any
     }
 
-    return new CreateQueryBuilder({
+    return new RelateQueryBuilder({
       ...this.#props,
     })
   }
@@ -72,21 +71,21 @@ export class CreateQueryBuilder<DB, TB extends keyof DB, O> implements Compilabl
    * You should only use this method as the last resort if the types
    * don't support your use case.
    */
-  castTo<T>(): CreateQueryBuilder<DB, TB, T> {
-    return new CreateQueryBuilder(this.#props)
+  castTo<T>(): RelateQueryBuilder<DB, TB, T> {
+    return new RelateQueryBuilder(this.#props)
   }
 
   /**
    * Returns a copy of this CreateQueryBuilder instance with the given plugin installed.
    */
-  withPlugin(plugin: KyselyPlugin): CreateQueryBuilder<DB, TB, O> {
-    return new CreateQueryBuilder({
+  withPlugin(plugin: KyselyPlugin): RelateQueryBuilder<DB, TB, O> {
+    return new RelateQueryBuilder({
       ...this.#props,
       executor: this.#props.executor.withPlugin(plugin),
     })
   }
 
-  toOperationNode(): CreateQueryNode {
+  toOperationNode(): RelateQueryNode {
     return this.#props.executor.transformQuery(this.#props.queryNode as any, this.#props.queryId) as any
   }
 
@@ -136,13 +135,8 @@ export class CreateQueryBuilder<DB, TB extends keyof DB, O> implements Compilabl
   }
 }
 
-preventAwait(
-  CreateQueryBuilder,
-  "don't await CreateQueryBuilder instances directly. To execute the query you need to call `execute` or `executeTakeFirst`.",
-)
-
-type CreateQueryBuilderProps = {
-  readonly executor: QueryExecutor
-  readonly queryId: QueryId
-  readonly queryNode: CreateQueryNode
+interface RelateQueryBuilderProps {
+  executor: QueryExecutor
+  queryId: QueryId
+  queryNode: RelateQueryNode
 }
