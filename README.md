@@ -57,7 +57,7 @@ To fix that, add an [`import_map.json`](https://deno.land/manual@v1.26.1/linking
 Older node versions are supported as well, just swap [`undici`](https://github.com/nodejs/undici) with [`node-fetch`](https://github.com/node-fetch/node-fetch).
 
 ```ts
-import {Kysely} from 'kysely'
+import {GeneratedAlways, Kysely} from 'kysely'
 import {SurrealDatabase, SurrealDbHttpDialect} from 'kysely-surrealdb'
 import {fetch} from 'undici'
 
@@ -94,20 +94,21 @@ const db = new Kysely<SurrealDatabase<Database>>({
 The awesomeness of Kysely, with some SurrealQL query builders patched in.
 
 ```ts
-import {Kysely} from 'kysely'
-import {SurrealDatabase, SurrealDbHttpDialect} from 'kysely-surrealdb'
+import {GeneratedAlways, Kysely} from 'kysely'
+import {SurrealDbHttpDialect, SurrealKysely} from 'kysely-surrealdb'
 import {fetch} from 'undici'
 
 interface Database {
   person: {
-    id: string
+    id: GeneratedAlways<string>
     first_name: string | null
     last_name: string | null
+    age: number
   }
   pet: {
-    id: string
+    id: GeneratedAlways<string>
     name: string
-    owner_id: string
+    owner_id: string | null
   }
 }
 
