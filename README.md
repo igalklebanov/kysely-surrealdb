@@ -34,7 +34,7 @@ pnpm add kysely-surrealdb kysely
 
 ### Deno
 
-This package uses/extends some [Kysely](https://github.com/koskimas/kysely) types and classes, which are imported using it's NPM package name -- not a relative file path or CDN url.
+This package uses/extends some [Kysely](https://github.com/koskimas/kysely) types and classes, which are imported using its NPM package name -- not a relative file path or CDN url.
 
 To fix that, add an [`import_map.json`](https://deno.land/manual@v1.26.1/linking_to_external_code/import_maps) file.
 
