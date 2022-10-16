@@ -7,3 +7,5 @@ export type SurrealDatabase<DB> = DB & {
 }
 
 export type SurrealDbDocumentRecordID<DB> = keyof DB extends string ? `${keyof DB}:${string}` : never
+
+export type AnyTable<DB> = keyof DB extends string ? (keyof DB extends `${infer TB}:${string}` ? TB : never) : never
