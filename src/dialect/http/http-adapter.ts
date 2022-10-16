@@ -4,7 +4,7 @@ import {SurrealDbLocksUnsupportedError} from '../errors.js'
 
 export class SurrealDbHttpAdapter extends DialectAdapterBase {
   get supportsReturning(): boolean {
-    return true
+    return false
   }
 
   get supportsTransactionalDdl(): boolean {
