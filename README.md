@@ -136,8 +136,7 @@ await db
 #### Why not write a query builder from scratch
 
 Kysely is growing to be THE sql query builder solution in the typescript ecosystem.
-Koskimas' dedication, attention to detail, experience from creating objection.js and 
-contributing to knex, project structure, simplicity, design patterns and philosophy, 
+Koskimas' dedication, attention to detail, experience from creating objection.js, project structure, simplicity, design patterns and philosophy, 
 made adding code to that project a really good experience as a contributor. Taking 
 what's great about that codebase, and patching in SurrealQL stuff seems like an easy 
 win in the short-medium term.
