@@ -1,6 +1,6 @@
 import type {DatabaseIntrospector, Dialect, DialectAdapter, Driver, Kysely, QueryCompiler} from 'kysely'
 
-import {SurrealDbQueryCompiler} from '../query-compiler.js'
+import {SurrealDbQueryCompiler} from '../../query-compiler/query-compiler.js'
 import {SurrealDbHttpAdapter} from './http-adapter.js'
 import {SurrealDbHttpDriver} from './http-driver.js'
 import {SurrealDbHttpIntrospector} from './http-introspector.js'

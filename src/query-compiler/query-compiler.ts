@@ -6,6 +6,7 @@ import {
   type SurrealOperationNode,
   type SurrealOperationNodeKind,
 } from '../operation-node/operation-node.js'
+import {RelateQueryNode} from '../operation-node/relate-query-node.js'
 import type {ReturnNode} from '../operation-node/return-node.js'
 import {isSurrealReturnType} from '../parser/return-parser.js'
 import {freeze} from '../util/object-utils.js'
@@ -21,6 +22,7 @@ export class SurrealDbQueryCompiler extends DefaultQueryCompiler {
 
   readonly #surrealVisitors: Record<SurrealOperationNodeKind, Function> = freeze({
     CreateQueryNode: this.visitCreateQuery.bind(this),
+    RelateQueryNode: this.visitRelateQuery.bind(this),
     ReturnNode: this.visitReturn.bind(this),
   })
 
@@ -35,14 +37,61 @@ export class SurrealDbQueryCompiler extends DefaultQueryCompiler {
     this.nodeStack.pop()
   }
 
+  protected visitCreateQuery(node: CreateQueryNode): void {
+    this.append('create ')
+    this.visitNode(node.target)
+
+    if (node.content) {
+      this.append(' content ')
+      this.visitNode(node.content)
+    }
+
+    if (node.set) {
+      this.append(' set ')
+      this.compileList(node.set)
+    }
+
+    if (node.return) {
+      this.append(' ')
+      this.visitNode(node.return as any)
+    }
+  }
+
   protected override visitOffset(node: OffsetNode): void {
     this.append('start ')
     this.visitNode(node.offset)
   }
 
-  protected visitCreateQuery(node: CreateQueryNode): void {
-    this.append('create ')
-    this.visitNode(node.target)
+  protected visitRelateQuery(node: RelateQueryNode): void {
+    this.append('relate ')
+
+    const isFromComplex = typeof node.from !== 'string'
+
+    if (isFromComplex) {
+      this.append('(')
+    }
+
+    this.visitNode(node.from)
+
+    if (isFromComplex) {
+      this.append(')')
+    }
+
+    this.append('->')
+    this.visitNode(node.relation)
+    this.append('->')
+
+    const isToComplex = typeof node.to !== 'string'
+
+    if (isToComplex) {
+      this.append('(')
+    }
+
+    this.visitNode(node.to)
+
+    if (isToComplex) {
+      this.append(')')
+    }
 
     if (node.content) {
       this.append(' content ')

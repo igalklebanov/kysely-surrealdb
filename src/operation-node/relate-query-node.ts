@@ -8,8 +8,8 @@ import type {ReturnNode} from './return-node.js'
 export interface RelateQueryNode extends SurrealOperationNode {
   readonly kind: 'RelateQueryNode'
   readonly from: VertexNode
-  readonly relation?: TableNode
-  readonly to?: VertexNode
+  readonly relation: TableNode
+  readonly to: VertexNode
   readonly content?: ValueNode
   readonly set?: ReadonlyArray<ColumnUpdateNode>
   readonly return?: ReturnNode
