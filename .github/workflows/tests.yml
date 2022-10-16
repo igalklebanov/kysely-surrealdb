@@ -18,7 +18,11 @@ jobs:
         image: surrealdb/surrealdb:latest
         ports:
           - 8000:8000
-        command: start --log trace --user root --pass root memory
+        options: >-
+          --health-cmd "start --log trace --user root --pass root memory"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
 
     steps:
       - name: Checkout
@@ -114,7 +118,11 @@ jobs:
   #       image: surrealdb/surrealdb:latest
   #       ports:
   #         - 8000:8000
-  #       command: start --log trace --user root --pass root memory
+  #       options: >-
+  #         --health-cmd "start --log trace --user root --pass root memory"
+  #         --health-interval 10s
+  #         --health-timeout 5s
+  #         --health-retries 5
 
   #   steps:
   #     - name: Checkout
@@ -161,7 +169,11 @@ jobs:
   #       image: surrealdb/surrealdb:latest
   #       ports:
   #         - 8000:8000
-  #       command: start --log trace --user root --pass root memory
+  #       options: >-
+  #         --health-cmd "start --log trace --user root --pass root memory"
+  #         --health-interval 10s
+  #         --health-timeout 5s
+  #         --health-retries 5
 
   #   steps:
   #     - name: Checkout
