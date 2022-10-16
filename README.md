@@ -50,7 +50,7 @@ To fix that, add an [`import_map.json`](https://deno.land/manual@v1.26.1/linking
 
 ### HTTP Dialect
 
-[SurrealDB](https://www.surrealdb.com/)'s [HTTP endpoints](https://surrealdb.com/docs/integration/http) allows executing [SurrealQL](https://surrealdb.com/docs/surrealql) queries in the browser and is a great fit for serverless functions and other auto-scaling compute services.
+[SurrealDB](https://www.surrealdb.com/)'s [HTTP endpoints](https://surrealdb.com/docs/integration/http) allow executing [SurrealQL](https://surrealdb.com/docs/surrealql) queries in the browser and are a great fit for serverless functions and other auto-scaling compute services.
 
 #### Node.js 16.8+
 
