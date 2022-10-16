@@ -13,18 +13,11 @@ jobs:
         node-version: [14.x, 16.x, 18.x]
       fail-fast: false
 
-    services:
-      surrealdb:
-        image: surrealdb/surrealdb:latest
-        ports:
-          - 8000:8000
-        options: >-
-          --health-cmd "start --log trace --user root --pass root memory && sql select * from test"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-
     steps:
+      - name: zzz
+        run: |
+          docker run -d -p 8000:8000 surrealdb/surrealdb:latest start --user root --pass root memory
+
       - name: Checkout
         uses: actions/checkout@v3
 
