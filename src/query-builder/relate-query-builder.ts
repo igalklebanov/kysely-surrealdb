@@ -1,6 +1,5 @@
 import {
   NoResultError,
-  ValueNode,
   type AnySelectQueryBuilder,
   type Compilable,
   type CompiledQuery,
@@ -11,7 +10,7 @@ import {
 } from 'kysely'
 
 import {RelateQueryNode} from '../operation-node/relate-query-node.js'
-import {parseCreateObject, type CreateObject} from '../parser/create-set-parser.js'
+import {parseContent, parseSetObject, type CreateObject} from '../parser/create-object-parser.js'
 import {
   parseReturnExpression,
   type ExtractTypeFromReturnExpression,
@@ -59,14 +58,14 @@ export class RelateQueryBuilder<DB, TB extends keyof DB, O = DB[TB]> implements 
   content<C extends CreateObject<DB, TB>>(content: C): RelateQueryBuilder<DB, TB, O & C> {
     return new RelateQueryBuilder({
       ...this.#props,
-      queryNode: RelateQueryNode.cloneWithContent(this.#props.queryNode, ValueNode.create(content)),
+      queryNode: RelateQueryNode.cloneWithContent(this.#props.queryNode, parseContent(content)),
     })
   }
 
   set<V extends CreateObject<DB, TB>>(values: V): RelateQueryBuilder<DB, TB, O & V> {
     return new RelateQueryBuilder({
       ...this.#props,
-      queryNode: RelateQueryNode.cloneWithSet(this.#props.queryNode, parseCreateObject(values)),
+      queryNode: RelateQueryNode.cloneWithSet(this.#props.queryNode, parseSetObject(values)),
     })
   }
 

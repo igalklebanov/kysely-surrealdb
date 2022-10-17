@@ -1,4 +1,11 @@
-import {DefaultQueryCompiler, TableNode, type OffsetNode, type OperationNode} from 'kysely'
+import {
+  DefaultQueryCompiler,
+  RawNode,
+  SelectQueryNode,
+  type OffsetNode,
+  type OperationNode,
+  type RootOperationNode,
+} from 'kysely'
 
 import type {CreateQueryNode} from '../operation-node/create-query-node.js'
 import {
@@ -12,6 +19,13 @@ import {isSurrealReturnType} from '../parser/return-parser.js'
 import {freeze} from '../util/object-utils.js'
 
 export class SurrealDbQueryCompiler extends DefaultQueryCompiler {
+  protected appendRootOperationNodeAsValue(node: RootOperationNode): void {
+    const {parameters, sql} = new SurrealDbQueryCompiler().compileQuery(node)
+
+    parameters.forEach((parameter) => this.appendValue(parameter))
+    this.appendValue(`SURREALQL::(${sql})`)
+  }
+
   protected override getLeftIdentifierWrapper(): string {
     return ''
   }
@@ -68,36 +82,24 @@ export class SurrealDbQueryCompiler extends DefaultQueryCompiler {
     this.append('relate ')
 
     if (from) {
-      const isComplexFrom = !TableNode.is(from)
-
-      if (isComplexFrom) {
-        this.append('(')
+      if (SelectQueryNode.is(from) || RawNode.is(from)) {
+        this.appendRootOperationNodeAsValue(from)
+      } else {
+        this.visitNode(from as any)
       }
 
-      this.visitNode(from as any)
-
-      if (isComplexFrom) {
-        this.append(')')
-      }
-
-      this.append('->')
+      this.append(' -> ')
     }
 
     this.visitNode(node.table)
 
     if (to) {
-      this.append('->')
+      this.append(' -> ')
 
-      const isComplexTo = !TableNode.is(to)
-
-      if (isComplexTo) {
-        this.append('(')
-      }
-
-      this.visitNode(to as any)
-
-      if (isComplexTo) {
-        this.append(')')
+      if (SelectQueryNode.is(to) || RawNode.is(to)) {
+        this.appendRootOperationNodeAsValue(to)
+      } else {
+        this.visitNode(to as any)
       }
     }
 

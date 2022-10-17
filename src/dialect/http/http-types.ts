@@ -62,11 +62,18 @@ export interface SurrealDbHttpRequestHeaders extends Record<string, string> {
 
 export type SurrealDbHttpResponseBody<R> = SurrealDbHttpResponseBodyItem<R>[]
 
-export interface SurrealDbHttpResponseBodyItem<R> {
-  result: R
-  status: 'OK'
-  time: string
-}
+export type SurrealDbHttpResponseBodyItem<R> =
+  | {
+      result: R
+      status: 'OK'
+      time: string
+    }
+  | {
+      detail: string
+      result: never
+      status: 'ERR'
+      time: string
+    }
 
 export type SurrealDbHttpDmlResponseBodyItem<O> = SurrealDbHttpResponseBodyItem<O[]>
 

@@ -1,6 +1,5 @@
 import {
   NoResultError,
-  ValueNode,
   type Compilable,
   type CompiledQuery,
   type KyselyPlugin,
@@ -9,7 +8,7 @@ import {
 } from 'kysely'
 
 import {CreateQueryNode} from '../operation-node/create-query-node.js'
-import {parseCreateObject, type CreateObject} from '../parser/create-set-parser.js'
+import {parseContent, parseSetObject, type CreateObject} from '../parser/create-object-parser.js'
 import {
   parseReturnExpression,
   type ExtractTypeFromReturnExpression,
@@ -29,14 +28,14 @@ export class CreateQueryBuilder<DB, TB extends keyof DB, O> implements Compilabl
   content<C extends CreateObject<DB, TB>>(content: C): CreateQueryBuilder<DB, TB, O & C> {
     return new CreateQueryBuilder({
       ...this.#props,
-      queryNode: CreateQueryNode.cloneWithContent(this.#props.queryNode, ValueNode.create(content)),
+      queryNode: CreateQueryNode.cloneWithContent(this.#props.queryNode, parseContent(content)),
     })
   }
 
   set<V extends CreateObject<DB, TB>>(values: V): CreateQueryBuilder<DB, TB, O & V> {
     return new CreateQueryBuilder({
       ...this.#props,
-      queryNode: CreateQueryNode.cloneWithSet(this.#props.queryNode, parseCreateObject(values)),
+      queryNode: CreateQueryNode.cloneWithSet(this.#props.queryNode, parseSetObject(values)),
     })
   }
 
