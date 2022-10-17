@@ -17,7 +17,7 @@ import {
 } from '../parser/return-parser.js'
 import {preventAwait} from '../util/prevent-await.js'
 import type {QueryId} from '../util/query-id.js'
-import {MergePartial} from '../util/type-utils.js'
+import type {MergePartial} from '../util/type-utils.js'
 
 export class CreateQueryBuilder<DB, TB extends keyof DB, O> implements Compilable {
   #props: CreateQueryBuilderProps

@@ -1,11 +1,13 @@
 import {
   NoResultError,
   ValueNode,
+  type AnySelectQueryBuilder,
   type Compilable,
   type CompiledQuery,
   type KyselyPlugin,
   type NoResultErrorConstructor,
   type QueryExecutor,
+  type RawBuilder,
 } from 'kysely'
 
 import {RelateQueryNode} from '../operation-node/relate-query-node.js'
@@ -15,7 +17,10 @@ import {
   type ExtractTypeFromReturnExpression,
   type ReturnExpression,
 } from '../parser/return-parser.js'
+import {parseVertexExpression, type VertexExpression} from '../parser/vertex-expression-parser.js'
+import {preventAwait} from '../util/prevent-await.js'
 import type {QueryId} from '../util/query-id.js'
+import type {AnyTable, SurrealRecordId} from '../util/surreal-types.js'
 import type {MergePartial} from '../util/type-utils.js'
 
 export class RelateQueryBuilder<DB, TB extends keyof DB, O = DB[TB]> implements Compilable {
@@ -23,6 +28,32 @@ export class RelateQueryBuilder<DB, TB extends keyof DB, O = DB[TB]> implements 
 
   constructor(props: RelateQueryBuilderProps) {
     this.#props = props
+  }
+
+  from<FT extends AnyTable<DB>>(table: FT, id: string | number): RelateQueryBuilder<DB, TB, O>
+  from<R extends SurrealRecordId<DB>>(record: R): RelateQueryBuilder<DB, TB, O>
+  from<EX extends AnySelectQueryBuilder | RawBuilder<any>>(expression: EX): RelateQueryBuilder<DB, TB, O>
+
+  from<T extends AnyTable<DB> | VertexExpression<DB>>(target: T, id?: string | number): RelateQueryBuilder<DB, TB, O> {
+    const expression = id !== undefined ? `${String(target)}:${id}` : target
+
+    return new RelateQueryBuilder({
+      ...this.#props,
+      queryNode: RelateQueryNode.cloneWithFrom(this.#props.queryNode, parseVertexExpression(expression as any)),
+    })
+  }
+
+  to<FT extends AnyTable<DB>>(table: FT, id: string | number): RelateQueryBuilder<DB, TB, O>
+  to<R extends SurrealRecordId<DB>>(record: R): RelateQueryBuilder<DB, TB, O>
+  to<EX extends AnySelectQueryBuilder | RawBuilder<any>>(expression: EX): RelateQueryBuilder<DB, TB, O>
+
+  to<T extends AnyTable<DB> | VertexExpression<DB>>(target: T, id?: string | number): RelateQueryBuilder<DB, TB, O> {
+    const expression = id !== undefined ? `${String(target)}:${id}` : target
+
+    return new RelateQueryBuilder({
+      ...this.#props,
+      queryNode: RelateQueryNode.cloneWithTo(this.#props.queryNode, parseVertexExpression(expression as any)),
+    })
   }
 
   content<C extends CreateObject<DB, TB>>(content: C): RelateQueryBuilder<DB, TB, O & C> {
@@ -134,6 +165,11 @@ export class RelateQueryBuilder<DB, TB extends keyof DB, O = DB[TB]> implements 
     return result as O
   }
 }
+
+preventAwait(
+  RelateQueryBuilder,
+  "don't await RelateQueryBuilder instances directly. To execute the query you need to call `execute` or `executeTakeFirst`.",
+)
 
 interface RelateQueryBuilderProps {
   executor: QueryExecutor

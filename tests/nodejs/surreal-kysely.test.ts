@@ -7,6 +7,9 @@ import {SurrealDbHttpDialect, SurrealDbHttpDialectConfig, SurrealKysely} from '.
 
 interface Database {
   person: Person
+  user: User
+  write: Write
+  article: Article
 }
 
 interface Person {
@@ -16,6 +19,23 @@ interface Person {
   skills: string[] | null
   username: string | null
   interests: string[] | null
+}
+
+interface User {
+  id: string
+  nickname: string | null
+}
+
+interface Write {
+  source: string | null
+  tags: string[] | null
+  time: {
+    written: string | null
+  } | null
+}
+
+interface Article {
+  id: GeneratedAlways<string>
 }
 
 describe('SurrealKysely', () => {
@@ -261,6 +281,52 @@ describe('SurrealKysely', () => {
     })
   })
 
+  describe('relate', () => {
+    before(async () => {
+      await insertUsers()
+      await insertArticles()
+    })
+
+    after(async () => {
+      await dropTable('write')
+      await dropTable('user')
+      await dropTable('article')
+    })
+
+    it('should execute a relate...set query between two specific records.', async () => {
+      const query = db
+        .relate('write')
+        .from('user:tobie')
+        .to('article:surreal')
+        .set({
+          'time.written': sql`time::now()`,
+        })
+
+      testSurrealQL(query, 'relate user:tobie->write->article:surreal set time.written = time::now()', [])
+
+      const actual = await query.execute()
+
+      expect(actual).to.be.an('array').which.has.lengthOf(1)
+    })
+
+    it('should execute a relate...set query between two specific records (table and id in separate arguments).', async () => {
+      const query = db
+        .relate('write')
+        .from('user', 'tobie')
+        .to('article', 'surrealql')
+        .set({
+          'time.written': sql`time::now()`,
+        })
+
+      testSurrealQL(query, 'relate user:tobie->write->article:surrealql set time.written = time::now()', [])
+
+      const actual = await query.execute()
+
+      expect(actual).to.be.an('array').which.has.lengthOf(1)
+    })
+  })
+})
+
 function getDB(config?: Partial<SurrealDbHttpDialectConfig>): SurrealKysely<Database> {
   return new SurrealKysely({
     dialect: new SurrealDbHttpDialect({
@@ -298,4 +364,21 @@ function testSurrealQL(query: Compilable, expected: string, parameters: unknown[
 
 async function dropTable(table: keyof Database): Promise<void> {
   await sql`remove table ${sql.table(table)}`.execute(getDB())
+}
+
+async function insertUsers(): Promise<void> {
+  await getDB()
+    .insertInto('user')
+    .values([{id: 'tobie', nickname: 'Tobie'}])
+    .execute()
+}
+
+async function insertArticles(): Promise<void> {
+  await getDB()
+    .insertInto('article')
+    .values([
+      {id: 'surreal', title: 'Surreal'},
+      {id: 'surrealql', title: 'SurrealQL'},
+    ])
+    .execute()
 }

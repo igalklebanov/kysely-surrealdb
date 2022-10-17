@@ -1,4 +1,4 @@
-import {DefaultQueryCompiler, type OffsetNode, type OperationNode} from 'kysely'
+import {DefaultQueryCompiler, TableNode, type OffsetNode, type OperationNode} from 'kysely'
 
 import type {CreateQueryNode} from '../operation-node/create-query-node.js'
 import {
@@ -63,44 +63,52 @@ export class SurrealDbQueryCompiler extends DefaultQueryCompiler {
   }
 
   protected visitRelateQuery(node: RelateQueryNode): void {
+    const {content, from, set, to} = node
+
     this.append('relate ')
 
-    const isFromComplex = typeof node.from !== 'string'
+    if (from) {
+      const isComplexFrom = !TableNode.is(from)
 
-    if (isFromComplex) {
-      this.append('(')
+      if (isComplexFrom) {
+        this.append('(')
+      }
+
+      this.visitNode(from as any)
+
+      if (isComplexFrom) {
+        this.append(')')
+      }
+
+      this.append('->')
     }
 
-    this.visitNode(node.from)
+    this.visitNode(node.table)
 
-    if (isFromComplex) {
-      this.append(')')
+    if (to) {
+      this.append('->')
+
+      const isComplexTo = !TableNode.is(to)
+
+      if (isComplexTo) {
+        this.append('(')
+      }
+
+      this.visitNode(to as any)
+
+      if (isComplexTo) {
+        this.append(')')
+      }
     }
 
-    this.append('->')
-    this.visitNode(node.relation)
-    this.append('->')
-
-    const isToComplex = typeof node.to !== 'string'
-
-    if (isToComplex) {
-      this.append('(')
-    }
-
-    this.visitNode(node.to)
-
-    if (isToComplex) {
-      this.append(')')
-    }
-
-    if (node.content) {
+    if (content) {
       this.append(' content ')
-      this.visitNode(node.content)
+      this.visitNode(content)
     }
 
-    if (node.set) {
+    if (set) {
       this.append(' set ')
-      this.compileList(node.set)
+      this.compileList(set)
     }
 
     if (node.return) {

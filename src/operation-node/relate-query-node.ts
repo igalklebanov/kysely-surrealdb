@@ -7,9 +7,9 @@ import type {ReturnNode} from './return-node.js'
 
 export interface RelateQueryNode extends SurrealOperationNode {
   readonly kind: 'RelateQueryNode'
-  readonly from: VertexNode
-  readonly relation: TableNode
-  readonly to: VertexNode
+  readonly from?: VertexNode
+  readonly table: TableNode
+  readonly to?: VertexNode
   readonly content?: ValueNode
   readonly set?: ReadonlyArray<ColumnUpdateNode>
   readonly return?: ReturnNode
@@ -20,11 +20,23 @@ export const RelateQueryNode = freeze({
     return node.kind === 'RelateQueryNode'
   },
 
-  create(from: VertexNode, relation: TableNode, to: VertexNode): RelateQueryNode {
+  create(table: TableNode): RelateQueryNode {
     return freeze({
       kind: 'RelateQueryNode',
+      table,
+    })
+  },
+
+  cloneWithFrom(relateQuery: RelateQueryNode, from: VertexNode): RelateQueryNode {
+    return freeze({
+      ...relateQuery,
       from,
-      relation,
+    })
+  },
+
+  cloneWithTo(relateQuery: RelateQueryNode, to: VertexNode): RelateQueryNode {
+    return freeze({
+      ...relateQuery,
       to,
     })
   },
