@@ -1,4 +1,11 @@
-import {DefaultQueryCompiler, type OffsetNode, type OperationNode} from 'kysely'
+import {
+  DefaultQueryCompiler,
+  RawNode,
+  SelectQueryNode,
+  type OffsetNode,
+  type OperationNode,
+  type RootOperationNode,
+} from 'kysely'
 
 import type {CreateQueryNode} from '../operation-node/create-query-node.js'
 import {
@@ -6,11 +13,19 @@ import {
   type SurrealOperationNode,
   type SurrealOperationNodeKind,
 } from '../operation-node/operation-node.js'
+import {RelateQueryNode} from '../operation-node/relate-query-node.js'
 import type {ReturnNode} from '../operation-node/return-node.js'
 import {isSurrealReturnType} from '../parser/return-parser.js'
 import {freeze} from '../util/object-utils.js'
 
 export class SurrealDbQueryCompiler extends DefaultQueryCompiler {
+  protected appendRootOperationNodeAsValue(node: RootOperationNode): void {
+    const {parameters, sql} = new SurrealDbQueryCompiler().compileQuery(node)
+
+    parameters.forEach((parameter) => this.appendValue(parameter))
+    this.appendValue(`SURREALQL::(${sql})`)
+  }
+
   protected override getLeftIdentifierWrapper(): string {
     return ''
   }
@@ -21,6 +36,7 @@ export class SurrealDbQueryCompiler extends DefaultQueryCompiler {
 
   readonly #surrealVisitors: Record<SurrealOperationNodeKind, Function> = freeze({
     CreateQueryNode: this.visitCreateQuery.bind(this),
+    RelateQueryNode: this.visitRelateQuery.bind(this),
     ReturnNode: this.visitReturn.bind(this),
   })
 
@@ -35,11 +51,6 @@ export class SurrealDbQueryCompiler extends DefaultQueryCompiler {
     this.nodeStack.pop()
   }
 
-  protected override visitOffset(node: OffsetNode): void {
-    this.append('start ')
-    this.visitNode(node.offset)
-  }
-
   protected visitCreateQuery(node: CreateQueryNode): void {
     this.append('create ')
     this.visitNode(node.target)
@@ -52,6 +63,54 @@ export class SurrealDbQueryCompiler extends DefaultQueryCompiler {
     if (node.set) {
       this.append(' set ')
       this.compileList(node.set)
+    }
+
+    if (node.return) {
+      this.append(' ')
+      this.visitNode(node.return as any)
+    }
+  }
+
+  protected override visitOffset(node: OffsetNode): void {
+    this.append('start ')
+    this.visitNode(node.offset)
+  }
+
+  protected visitRelateQuery(node: RelateQueryNode): void {
+    const {content, from, set, to} = node
+
+    this.append('relate ')
+
+    if (from) {
+      if (SelectQueryNode.is(from) || RawNode.is(from)) {
+        this.appendRootOperationNodeAsValue(from)
+      } else {
+        this.visitNode(from as any)
+      }
+
+      this.append(' -> ')
+    }
+
+    this.visitNode(node.table)
+
+    if (to) {
+      this.append(' -> ')
+
+      if (SelectQueryNode.is(to) || RawNode.is(to)) {
+        this.appendRootOperationNodeAsValue(to)
+      } else {
+        this.visitNode(to as any)
+      }
+    }
+
+    if (content) {
+      this.append(' content ')
+      this.visitNode(content)
+    }
+
+    if (set) {
+      this.append(' set ')
+      this.compileList(set)
     }
 
     if (node.return) {

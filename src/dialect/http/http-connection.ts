@@ -18,8 +18,10 @@ export class SurrealDbHttpConnection implements DatabaseConnection {
   async executeQuery<O>(compiledQuery: CompiledQuery): Promise<QueryResult<O>> {
     this.#assertSingleStatementQuery(compiledQuery)
 
+    const body = this.#serializeQuery(compiledQuery)
+
     const response = await this.#config.fetch(`${this.#basePath}/sql`, {
-      body: this.#serializeQuery(compiledQuery),
+      body,
       headers: this.#requestHeaders,
       method: 'POST',
     })
@@ -30,14 +32,14 @@ export class SurrealDbHttpConnection implements DatabaseConnection {
 
     const responseBody = await response.json()
 
-    const {result, status} = (responseBody as SurrealDbHttpResponseBody<O[]>).pop() || {}
+    const queryResult = (responseBody as SurrealDbHttpResponseBody<O[]>).pop()
 
-    if (status !== 'OK') {
-      throw new SurrealDbHttpDatabaseError(status)
+    if (queryResult?.status === 'ERR') {
+      throw new SurrealDbHttpDatabaseError(queryResult.detail)
     }
 
     return {
-      rows: result ?? [],
+      rows: queryResult?.result ?? [],
     }
   }
 
@@ -55,9 +57,20 @@ export class SurrealDbHttpConnection implements DatabaseConnection {
     const {parameters, sql} = compiledQuery
 
     if (!parameters.length) {
-      return sql
+      return `${sql};`
     }
 
-    return [...parameters.map((parameter, index) => `let $${index + 1} = ${JSON.stringify(parameter)}`), sql].join(';')
+    return [
+      ...parameters.map(
+        (parameter, index) =>
+          `let $${index + 1} = ${
+            typeof parameter === 'string' && parameter.startsWith('SURREALQL::')
+              ? parameter.replace(/^SURREALQL::(\(.+\))/, '$1')
+              : JSON.stringify(parameter)
+          }`,
+      ),
+      sql,
+      '',
+    ].join(';')
   }
 }
