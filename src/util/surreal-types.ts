@@ -1,12 +1,8 @@
 export type SurrealDatabase<DB> = DB & {
-  [K in SurrealDbDocumentRecordID<DB>]: K extends `${infer TB}:${string}`
-    ? TB extends keyof DB
-      ? DB[TB]
-      : never
-    : never
+  [K in SurrealRecordId<DB>]: K extends `${infer TB}:${string}` ? (TB extends keyof DB ? DB[TB] : never) : never
 }
 
-export type SurrealDbDocumentRecordID<DB> = keyof DB extends string ? `${keyof DB}:${Letter | Digit}${string}` : never
+export type SurrealRecordId<DB> = keyof DB extends string ? `${keyof DB}:${Letter | Digit}${string}` : never
 
 type Letter =
   | 'a'

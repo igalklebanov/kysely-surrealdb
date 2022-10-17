@@ -25,11 +25,11 @@ describe('SurrealKysely', () => {
     db = getDB()
   })
 
-  after(async () => {
-    await dropPerson()
-  })
-
   describe('create', () => {
+    after(async () => {
+      await dropTable('person')
+    })
+
     it('should execute a create...set query with a random id.', async () => {
       const query = db.create('person').set({
         name: 'Tobie',
@@ -241,8 +241,25 @@ describe('SurrealKysely', () => {
       expect(actual).to.be.an('array').which.has.lengthOf(1)
       expect(actual[0]).to.deep.equal({interests: ['skiing', 'music'], name: null})
     })
+
+    it('should execute a create...set query with table and id as 2 separate arguments.', async () => {
+      const query = db.create('person', 'recordid').set({
+        age: 46,
+        username: 'john-smith',
+        interests: ['skiing', 'music'],
+      })
+
+      testSurrealQL(query, 'create person:recordid set age = $1, username = $2, interests = $3', [
+        46,
+        'john-smith',
+        ['skiing', 'music'],
+      ])
+
+      const actual = await query.execute()
+
+      expect(actual).to.be.an('array').which.has.lengthOf(1)
+    })
   })
-})
 
 function getDB(config?: Partial<SurrealDbHttpDialectConfig>): SurrealKysely<Database> {
   return new SurrealKysely({
@@ -279,6 +296,6 @@ function testSurrealQL(query: Compilable, expected: string, parameters: unknown[
   expect(compiledQuery.parameters).to.be.deep.equal(parameters)
 }
 
-async function dropPerson(): Promise<void> {
-  await sql`remove table person`.execute(getDB())
+async function dropTable(table: keyof Database): Promise<void> {
+  await sql`remove table ${sql.table(table)}`.execute(getDB())
 }

@@ -1,8 +1,8 @@
 import {TableNode, type AnySelectQueryBuilder, type RawBuilder, type RawNode, type SelectQueryNode} from 'kysely'
 
-import type {SurrealDbDocumentRecordID} from '../util/surreal-types.js'
+import type {SurrealRecordId} from '../util/surreal-types.js'
 
-export type VertexExpression<DB> = SurrealDbDocumentRecordID<DB> | AnySelectQueryBuilder | RawBuilder<any>
+export type VertexExpression<DB> = SurrealRecordId<DB> | AnySelectQueryBuilder | RawBuilder<any>
 
 export type VertexNode = TableNode | RawNode | SelectQueryNode
 
