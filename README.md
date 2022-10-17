@@ -133,6 +133,10 @@ await db
   .execute()
 ```
 
+#### Supported SurrealQL specific statements:
+
+[create](https://surrealdb.com/docs/surrealql/statements/create), [relate](https://surrealdb.com/docs/surrealql/statements/relate).
+
 #### Why not write a query builder from scratch
 
 Kysely is growing to be THE sql query builder solution in the typescript ecosystem.
