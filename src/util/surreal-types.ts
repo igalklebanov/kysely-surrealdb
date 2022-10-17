@@ -6,6 +6,36 @@ export type SurrealDatabase<DB> = DB & {
     : never
 }
 
-export type SurrealDbDocumentRecordID<DB> = keyof DB extends string ? `${keyof DB}:${string}` : never
+export type SurrealDbDocumentRecordID<DB> = keyof DB extends string ? `${keyof DB}:${Letter | Digit}${string}` : never
+
+type Letter =
+  | 'a'
+  | 'b'
+  | 'c'
+  | 'd'
+  | 'e'
+  | 'f'
+  | 'g'
+  | 'h'
+  | 'i'
+  | 'j'
+  | 'k'
+  | 'l'
+  | 'm'
+  | 'n'
+  | 'o'
+  | 'p'
+  | 'q'
+  | 'r'
+  | 's'
+  | 't'
+  | 'u'
+  | 'v'
+  | 'w'
+  | 'x'
+  | 'y'
+  | 'z'
+
+type Digit = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
 
 export type AnyTable<DB> = keyof DB extends string ? (keyof DB extends `${infer TB}:${string}` ? TB : never) : never
