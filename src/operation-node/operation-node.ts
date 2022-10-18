@@ -1,4 +1,9 @@
-export type SurrealOperationNodeKind = 'CreateQueryNode' | 'ReturnNode' | 'RelateQueryNode'
+export type SurrealOperationNodeKind =
+  | 'CreateQueryNode'
+  | 'ElseIfNode'
+  | 'IfQueryNode'
+  | 'RelateQueryNode'
+  | 'ReturnNode'
 
 export interface SurrealOperationNode {
   readonly kind: SurrealOperationNodeKind
@@ -6,6 +11,8 @@ export interface SurrealOperationNode {
 
 const surrealKindDictionary: Record<SurrealOperationNodeKind, true> = {
   CreateQueryNode: true,
+  ElseIfNode: true,
+  IfQueryNode: true,
   RelateQueryNode: true,
   ReturnNode: true,
 }
