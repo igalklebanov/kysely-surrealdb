@@ -21,19 +21,28 @@ import {preventAwait} from '../util/prevent-await.js'
 import type {QueryId} from '../util/query-id.js'
 import type {AnyTable, SurrealRecordId} from '../util/surreal-types.js'
 import type {MergePartial} from '../util/type-utils.js'
+import type {ReturnInterface} from './return-interface.js'
+import type {SetContentInterface} from './set-content-interface.js'
 
-export class RelateQueryBuilder<DB, TB extends keyof DB, O = DB[TB]> implements Compilable {
+export class RelateQueryBuilder<DB, TB extends keyof DB, O = DB[TB]>
+  implements Compilable, ReturnInterface<DB, TB, O>, SetContentInterface<DB, TB, O>
+{
   readonly #props: RelateQueryBuilderProps
 
   constructor(props: RelateQueryBuilderProps) {
     this.#props = props
   }
 
-  from<FT extends AnyTable<DB>>(table: FT, id: string | number): RelateQueryBuilder<DB, TB, O>
-  from<R extends SurrealRecordId<DB>>(record: R): RelateQueryBuilder<DB, TB, O>
-  from<EX extends AnySelectQueryBuilder | RawBuilder<any>>(expression: EX): RelateQueryBuilder<DB, TB, O>
+  /**
+   *
+   */
+  from(table: AnyTable<DB>, id: string | number): RelateQueryBuilder<DB, TB, O>
 
-  from<T extends AnyTable<DB> | VertexExpression<DB>>(target: T, id?: string | number): RelateQueryBuilder<DB, TB, O> {
+  from(record: SurrealRecordId<DB>): RelateQueryBuilder<DB, TB, O>
+
+  from(expression: AnySelectQueryBuilder | RawBuilder<any>): RelateQueryBuilder<DB, TB, O>
+
+  from(target: AnyTable<DB> | VertexExpression<DB>, id?: string | number): any {
     const expression = id !== undefined ? `${String(target)}:${id}` : target
 
     return new RelateQueryBuilder({
@@ -42,11 +51,16 @@ export class RelateQueryBuilder<DB, TB extends keyof DB, O = DB[TB]> implements 
     })
   }
 
-  to<FT extends AnyTable<DB>>(table: FT, id: string | number): RelateQueryBuilder<DB, TB, O>
-  to<R extends SurrealRecordId<DB>>(record: R): RelateQueryBuilder<DB, TB, O>
-  to<EX extends AnySelectQueryBuilder | RawBuilder<any>>(expression: EX): RelateQueryBuilder<DB, TB, O>
+  /**
+   *
+   */
+  to(table: AnyTable<DB>, id: string | number): RelateQueryBuilder<DB, TB, O>
 
-  to<T extends AnyTable<DB> | VertexExpression<DB>>(target: T, id?: string | number): RelateQueryBuilder<DB, TB, O> {
+  to(record: SurrealRecordId<DB>): RelateQueryBuilder<DB, TB, O>
+
+  to(expression: AnySelectQueryBuilder | RawBuilder<any>): RelateQueryBuilder<DB, TB, O>
+
+  to(target: AnyTable<DB> | VertexExpression<DB>, id?: string | number): any {
     const expression = id !== undefined ? `${String(target)}:${id}` : target
 
     return new RelateQueryBuilder({
@@ -78,10 +92,66 @@ export class RelateQueryBuilder<DB, TB extends keyof DB, O = DB[TB]> implements 
     })
   }
 
+  /**
+   * Simply calls the given function passing `this` as the only argument.
+   *
+   * If you want to conditionally call a method on `this`, see the {@link if} method.
+   *
+   * ### Examples
+   *
+   * The next example uses a helper funtion `log` to log a query:
+   *
+   * ```ts
+   * function log<T extends Compilable>(qb: T): T {
+   *   console.log(qb.compile())
+   *   return qb
+   * }
+   *
+   * db.updateTable('person')
+   *   .set(values)
+   *   .call(log)
+   *   .execute()
+   * ```
+   */
   call<T>(func: (qb: this) => T): T {
     return func(this)
   }
 
+  /**
+   * Call `func(this)` if `condition` is true.
+   *
+   * This method is especially handy with optional selects. Any `return` method
+   * calls add columns as optional fields to the output type when called inside
+   * the `func` callback. This is because we can't know if those selections were
+   * actually made before running the code.
+   *
+   * You can also call any other methods inside the callback.
+   *
+   * ### Examples
+   *
+   * ```ts
+   * async function createPerson(values: Insertable<Person>, returnLastName: boolean) {
+   *   return await db
+   *     .create('person')
+   *     .set(values)
+   *     .return(['id', 'first_name'])
+   *     .if(returnLastName, (qb) => qb.return('last_name'))
+   *     .executeTakeFirstOrThrow()
+   * }
+   * ```
+   *
+   * Any selections added inside the `if` callback will be added as optional fields to the
+   * output type since we can't know if the selections were actually made before running
+   * the code. In the example above the return type of the `createPerson` function is:
+   *
+   * ```ts
+   * {
+   *   id: number
+   *   first_name: string
+   *   last_name?: string
+   * }
+   * ```
+   */
   if<O2>(
     condition: boolean,
     func: (qb: this) => RelateQueryBuilder<DB, TB, O2>,
@@ -98,15 +168,15 @@ export class RelateQueryBuilder<DB, TB extends keyof DB, O = DB[TB]> implements 
   /**
    * Change the output type of the query.
    *
-   * You should only use this method as the last resort if the types
-   * don't support your use case.
+   * You should only use this method as the last resort if the types don't support
+   * your use case.
    */
   castTo<T>(): RelateQueryBuilder<DB, TB, T> {
     return new RelateQueryBuilder(this.#props)
   }
 
   /**
-   * Returns a copy of this CreateQueryBuilder instance with the given plugin installed.
+   * Returns a copy of this RelateQueryBuilder instance with the given plugin installed.
    */
   withPlugin(plugin: KyselyPlugin): RelateQueryBuilder<DB, TB, O> {
     return new RelateQueryBuilder({
@@ -126,7 +196,8 @@ export class RelateQueryBuilder<DB, TB extends keyof DB, O = DB[TB]> implements 
   /**
    * Executes the query and returns an array of rows.
    *
-   * Also see the {@link executeTakeFirst} and {@link executeTakeFirstOrThrow} methods.
+   * Also see the {@link executeTakeFirst} and {@link executeTakeFirstOrThrow}
+   * methods.
    */
   async execute(): Promise<O[]> {
     const compiledQuery = this.compile()
@@ -137,8 +208,8 @@ export class RelateQueryBuilder<DB, TB extends keyof DB, O = DB[TB]> implements 
   }
 
   /**
-   * Executes the query and returns the first result or undefined if
-   * the query returned no result.
+   * Executes the query and returns the first result or undefined if the query
+   * returned no result.
    */
   async executeTakeFirst(): Promise<O> {
     const [result] = await this.execute()
@@ -147,12 +218,11 @@ export class RelateQueryBuilder<DB, TB extends keyof DB, O = DB[TB]> implements 
   }
 
   /**
-   * Executes the query and returns the first result or throws if
-   * the query returned no result.
+   * Executes the query and returns the first result or throws if the query returned
+   * no result.
    *
-   * By default an instance of {@link NoResultError} is thrown, but you can
-   * provide a custom error class as the only argument to throw a different
-   * error.
+   * By default an instance of {@link NoResultError} is thrown, but you can provide
+   * a custom error class as the only argument to throw a different error.
    */
   async executeTakeFirstOrThrow(errorConstructor: NoResultErrorConstructor = NoResultError): Promise<O> {
     const result = await this.executeTakeFirst()
