@@ -1,5 +1,11 @@
-export type SurrealDatabase<DB> = DB & {
-  [K in SurrealRecordId<DB>]: K extends `${infer TB}:${string}` ? (TB extends keyof DB ? DB[TB] : never) : never
+export type SurrealDatabase<DB> = {
+  [K in keyof DB | SurrealRecordId<DB>]: K extends `${infer TB}:${string}`
+    ? TB extends keyof DB
+      ? DB[TB]
+      : never
+    : K extends keyof DB
+    ? DB[K]
+    : never
 }
 
 export type SurrealRecordId<DB> = keyof DB extends string ? `${keyof DB}:${string}` : never
