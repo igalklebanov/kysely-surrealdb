@@ -19,7 +19,7 @@ import {
   type User,
 } from './shared'
 
-describe.only('SurrealKysely.select(...)', () => {
+describe('SurrealKysely.select(...)', () => {
   let db: SurrealKysely<Database>
 
   before(async () => {
