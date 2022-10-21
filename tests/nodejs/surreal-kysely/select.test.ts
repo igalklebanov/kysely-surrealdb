@@ -8,6 +8,7 @@ import {
   insertArticles,
   insertCompanies,
   insertCustomers,
+  insertEvents,
   insertPeople,
   insertTemperatures,
   insertUsers,
@@ -31,6 +32,7 @@ describe('SurrealKysely.select(...)', () => {
     await insertCustomers()
     await insertPeople()
     await insertTemperatures()
+    await insertEvents()
   })
 
   after(async () => {
@@ -41,6 +43,7 @@ describe('SurrealKysely.select(...)', () => {
     await dropTable('like')
     await dropTable('person')
     await dropTable('temperature')
+    await dropTable('events')
   })
 
   it('should execute a select query.', async () => {
@@ -194,12 +197,19 @@ describe('SurrealKysely.select(...)', () => {
     const query = db
       .selectFrom('user')
       .selectAll()
-      .select(db.selectFrom('events').where('type', '=', 'activity').selectAll().limit(5).as('history'))
+      .select(
+        db
+          .selectFrom('events')
+          .where('type', '=', 'activity')
+          .selectAll()
+          .modifyEnd(sql`limit 5`)
+          .as('history'),
+      )
       .castTo<User & {history: ReadonlyArray<Event>}>()
 
     testSurrealQl(query, {
-      sql: 'select *, (select * from events where type = $1 limit $2) as history from user',
-      parameters: ['activity', 5],
+      sql: 'select *, (select * from events where type = $1 limit 5) as history from user',
+      parameters: ['activity'],
     })
 
     const actual = await query.execute()
@@ -207,7 +217,7 @@ describe('SurrealKysely.select(...)', () => {
     expect(actual).to.be.an('array').that.is.not.empty
     actual.forEach((user) => {
       expect(user).to.be.an('object')
-      expect(user.history).to.be.an('array').that.is.not.empty
+      expect(user.history).to.be.an('array').that.has.lengthOf(5)
       user.history.forEach((event) => {
         expect(event).to.be.an('object')
         expect(event.id).to.be.a('string')

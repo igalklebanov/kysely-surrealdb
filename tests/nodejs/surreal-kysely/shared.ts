@@ -189,4 +189,5 @@ export async function insertEvents(): Promise<void> {
       {type: 'activity'},
       {type: 'activity'},
     ])
+    .execute()
 }
