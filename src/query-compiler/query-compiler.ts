@@ -2,6 +2,7 @@ import {
   DefaultQueryCompiler,
   RawNode,
   SelectQueryNode,
+  type IdentifierNode,
   type OffsetNode,
   type OperationNode,
   type RootOperationNode,
@@ -27,11 +28,11 @@ export class SurrealDbQueryCompiler extends DefaultQueryCompiler {
   }
 
   protected override getLeftIdentifierWrapper(): string {
-    return ''
+    return '`'
   }
 
   protected override getRightIdentifierWrapper(): string {
-    return ''
+    return '`'
   }
 
   readonly #surrealVisitors: Record<SurrealOperationNodeKind, Function> = freeze({
@@ -69,6 +70,14 @@ export class SurrealDbQueryCompiler extends DefaultQueryCompiler {
       this.append(' ')
       this.visitNode(node.return as any)
     }
+  }
+
+  protected override visitIdentifier(node: IdentifierNode): void {
+    if (node.name.includes(' ')) {
+      return super.visitIdentifier(node)
+    }
+
+    this.compileUnwrappedIdentifier(node)
   }
 
   protected override visitOffset(node: OffsetNode): void {
