@@ -1,9 +1,14 @@
 import {expect} from 'chai'
-import {RawBuilder, sql, type ColumnType, type Compilable, type GeneratedAlways} from 'kysely'
+import {RawBuilder, sql, type ColumnType, type Compilable} from 'kysely'
 import nodeFetch from 'node-fetch'
 import {fetch as undiciFetch} from 'undici'
 
-import {SurrealDbHttpDialect, SurrealKysely, type SurrealDbHttpDialectConfig} from '../../../src'
+import {
+  SurrealDbHttpDialect,
+  SurrealDbQueryCompiler,
+  SurrealKysely,
+  type SurrealDbHttpDialectConfig,
+} from '../../../src'
 
 export interface Database {
   person: Person
@@ -15,10 +20,10 @@ export interface Database {
   customer: Customer
   temperature: Temperature
   events: Event
+  admin: Admin
 }
 
 export interface Person {
-  id: GeneratedAlways<string>
   name: string | null
   company: string | null
   skills: string[] | null
@@ -27,7 +32,6 @@ export interface Person {
 }
 
 export interface User {
-  id: string
   nickname: string | null
   tags: string[] | null
   age: number | null
@@ -46,7 +50,6 @@ export interface Write {
 }
 
 export interface Article {
-  id: GeneratedAlways<string>
   title: string | null
   tags: ReadonlyArray<{
     value: string
@@ -54,7 +57,6 @@ export interface Article {
 }
 
 export interface Company {
-  id: GeneratedAlways<string>
   users: any
 }
 
@@ -65,20 +67,23 @@ export interface Like {
 }
 
 export interface Customer {
-  id: GeneratedAlways<string>
   addresses: ReadonlyArray<{
     active: boolean
   }> | null
 }
 
 export interface Temperature {
-  id: GeneratedAlways<string>
   celsius: number
 }
 
 export interface Event {
-  id: GeneratedAlways<string>
   type: string
+}
+
+export interface Admin {
+  time: {
+    created: string | null
+  } | null
 }
 
 export function getDb(config?: Partial<SurrealDbHttpDialectConfig>): SurrealKysely<Database> {
@@ -109,10 +114,18 @@ function getFetch() {
   return nodeFetch
 }
 
-export function testSurrealQl(actual: Compilable, expected: {parameters: unknown[]; sql: string | string[]}): void {
-  const {sql} = expected
+export function testSurrealQL(
+  actual: Compilable | RawBuilder<any>,
+  expected: {parameters: unknown[]; sql: string | string[]},
+): void {
+  if (actual instanceof RawBuilder) {
+    const akchual = actual
+    actual = {compile: () => new SurrealDbQueryCompiler().compileQuery(akchual.toOperationNode())}
+  }
 
   const compiledQuery = actual.compile()
+
+  const {sql} = expected
 
   expect(compiledQuery.sql).to.be.equal(Array.isArray(sql) ? sql.join?.(' ') : sql)
   expect(compiledQuery.parameters).to.be.deep.equal(expected.parameters)
@@ -141,6 +154,7 @@ export async function insertUsers(): Promise<void> {
     .insertInto('user')
     .values([
       {id: 'tobie', nickname: 'Tobie', tags: ['developer']},
+      {id: 'jaime', nickname: 'Jaime', tags: ['co-founder']},
       {id: 'igal', nickname: 'Igal', age: 33, email: 'igalklebanov@gmail.com', name: 'Igal'},
       {id: 'moshe', nickname: 'Moshe'},
     ])
@@ -189,5 +203,12 @@ export async function insertEvents(): Promise<void> {
       {type: 'activity'},
       {type: 'activity'},
     ])
+    .execute()
+}
+
+export async function insertAdmins(): Promise<void> {
+  await getDb()
+    .insertInto('admin')
+    .values([{'time.created': sql`time::now()`}])
     .execute()
 }

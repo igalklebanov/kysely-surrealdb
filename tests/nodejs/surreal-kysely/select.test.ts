@@ -1,10 +1,11 @@
 import {expect} from 'chai'
 import {sql} from 'kysely'
 
-import type {SurrealKysely} from '../../../src'
+import type {SurrealKysely, SurrealRecord} from '../../../src'
 import {
   dropTable,
   getDb,
+  insertAdmins,
   insertArticles,
   insertCompanies,
   insertCustomers,
@@ -12,7 +13,8 @@ import {
   insertPeople,
   insertTemperatures,
   insertUsers,
-  testSurrealQl,
+  testSurrealQL,
+  type Company,
   type Customer,
   type Database,
   type Event,
@@ -33,6 +35,7 @@ describe('SurrealKysely.select(...)', () => {
     await insertPeople()
     await insertTemperatures()
     await insertEvents()
+    await insertAdmins()
   })
 
   after(async () => {
@@ -44,12 +47,13 @@ describe('SurrealKysely.select(...)', () => {
     await dropTable('person')
     await dropTable('temperature')
     await dropTable('events')
+    await dropTable('admin')
   })
 
   it('should execute a select query.', async () => {
     const query = db.selectFrom('user').select(['age', 'name', 'email'])
 
-    testSurrealQl(query, {
+    testSurrealQL(query, {
       sql: 'select age, name, email from user',
       parameters: [],
     })
@@ -69,7 +73,7 @@ describe('SurrealKysely.select(...)', () => {
   it('should execute a select query while using an expression in select clause.', async () => {
     const query = db.selectFrom('user').select((eb) => sql<boolean>`${eb.ref('age')} >= ${18}`.as('adult'))
 
-    testSurrealQl(query, {
+    testSurrealQL(query, {
       sql: 'select age >= $1 as adult from user',
       parameters: [18],
     })
@@ -90,7 +94,7 @@ describe('SurrealKysely.select(...)', () => {
       .selectAll()
       .select((eb) => sql<ReadonlyArray<string> | null>`${eb.ref('tags')}.*.${sql.ref('value')}`.as('tags'))
 
-    testSurrealQl(query, {
+    testSurrealQL(query, {
       sql: 'select *, tags.*.value as tags from article',
       parameters: [],
     })
@@ -115,7 +119,7 @@ describe('SurrealKysely.select(...)', () => {
         sql<Customer['addresses']>`${eb.ref('addresses')}[where ${sql.ref('active')} = ${true}]`.as('addresses'),
       )
 
-    testSurrealQl(query, {
+    testSurrealQL(query, {
       sql: 'select addresses[where active = $1] as addresses from customer',
       parameters: [true],
     })
@@ -141,7 +145,7 @@ describe('SurrealKysely.select(...)', () => {
       .selectFrom('person:tobie')
       .select(sql<Person['name']>`->${sql.table('like')}->${sql.ref('person.name')}`.as('friends'))
 
-    testSurrealQl(query, {
+    testSurrealQL(query, {
       sql: 'select ->like->person.name as friends from person:tobie',
       parameters: [],
     })
@@ -158,7 +162,7 @@ describe('SurrealKysely.select(...)', () => {
       .selectFrom('temperature')
       .select((eb) => sql<number>`( ( ${eb.ref('celsius')} * 2 ) + 30 )`.as('fahrenheit'))
 
-    testSurrealQl(query, {
+    testSurrealQL(query, {
       sql: 'select ( ( celsius * 2 ) + 30 ) as fahrenheit from temperature',
       parameters: [],
     })
@@ -178,7 +182,7 @@ describe('SurrealKysely.select(...)', () => {
 
     const query = db.selectFrom('user').select(sql<typeof expected>`${expected}`.as('marketing settings'))
 
-    testSurrealQl(query, {
+    testSurrealQL(query, {
       sql: 'select $1 as `marketing settings` from user',
       parameters: [expected],
     })
@@ -205,9 +209,9 @@ describe('SurrealKysely.select(...)', () => {
           .modifyEnd(sql`limit 5`)
           .as('history'),
       )
-      .castTo<User & {history: ReadonlyArray<Event>}>()
+      .castTo<User & {history: ReadonlyArray<SurrealRecord<Event>>}>()
 
-    testSurrealQl(query, {
+    testSurrealQL(query, {
       sql: 'select *, (select * from events where type = $1 limit 5) as history from user',
       parameters: ['activity'],
     })
@@ -225,4 +229,76 @@ describe('SurrealKysely.select(...)', () => {
       })
     })
   })
+
+  it('should execute a select query from multiple tables.', async () => {
+    const query = db.selectFrom(['user', 'admin']).selectAll()
+
+    testSurrealQL(query, {
+      sql: 'select * from user, admin',
+      parameters: [],
+    })
+
+    const actual = await query.execute()
+
+    expect(actual).to.be.an('array').that.is.not.empty
+    actual.forEach((row) => {
+      expect(row).to.be.an('object')
+    })
+  })
+
+  it('should execute a select query from a parameter.', async () => {
+    const parameter = [{admin: true}, {admin: false}]
+
+    const query = sql<typeof parameter[number]>`select * from ${parameter} where ${db.dynamic.ref('admin')} = ${true}`
+    // unsupported. kysely demands alias raw builder in selectFrom, surrealdb demands no alias.
+    // const query = db
+    //   .selectFrom(sql`${parameter}`.as('p'))
+    //   .where(db.dynamic.ref('admin'), '=', true)
+    //   .selectAll()
+    //   .castTo<{admin: true}>()
+
+    testSurrealQL(query, {
+      sql: 'select * from $1 where admin = $2',
+      parameters: [parameter, true],
+    })
+
+    const {rows: actual} = await query.execute(db)
+
+    expect(actual).to.deep.equal(parameter.filter((param) => param.admin))
+  })
+
+  it('should execute a select query from multiple specific records.', async () => {
+    const query = db
+      .selectFrom(['user:tobie', 'user:jaime', 'company:surrealdb'])
+      .selectAll()
+      .castTo<SurrealRecord<User> | SurrealRecord<Company>>()
+
+    testSurrealQL(query, {
+      sql: 'select * from user:tobie, user:jaime, company:surrealdb',
+      parameters: [],
+    })
+
+    const actual = await query.execute()
+
+    expect(actual).to.be.an('array').that.is.not.empty
+  })
+
+  it('should execute a select query from an array of values and records.', async () => {
+    const query = sql<3648937 | 'test' | SurrealRecord<Person>>`select * from [${3648937}, ${'test'}, ${sql.ref(
+      'person:lrym5gur8hzws72ux5fa',
+    )}, ${sql.ref('person:4luro9170uwcv1xrfvby')}]`
+
+    testSurrealQL(query, {
+      sql: 'select * from [$1, $2, person:lrym5gur8hzws72ux5fa, person:4luro9170uwcv1xrfvby]',
+      parameters: [3648937, 'test'],
+    })
+
+    const {rows: actual} = await query.execute(db)
+
+    expect(actual).to.be.an('array').that.is.not.empty
+
+    // TODO: ...
+  })
+
+  // TODO: ...
 })

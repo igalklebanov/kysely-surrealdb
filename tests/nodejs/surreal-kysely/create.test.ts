@@ -1,7 +1,7 @@
 import {expect} from 'chai'
 
 import type {SurrealKysely} from '../../../src'
-import {dropTable, getDb, testSurrealQl, type Database} from './shared'
+import {dropTable, getDb, testSurrealQL, type Database} from './shared'
 
 describe('SurrealKysely.create(...)', () => {
   let db: SurrealKysely<Database>
@@ -21,7 +21,7 @@ describe('SurrealKysely.create(...)', () => {
       skills: ['Rust', 'Go', 'JavaScript'],
     })
 
-    testSurrealQl(query, {
+    testSurrealQL(query, {
       sql: 'create person set name = $1, company = $2, skills = $3',
       parameters: ['Tobie', 'SurrealDB', ['Rust', 'Go', 'JavaScript']],
     })
@@ -38,7 +38,7 @@ describe('SurrealKysely.create(...)', () => {
       skills: ['Rust', 'Go', 'JavaScript'],
     })
 
-    testSurrealQl(query, {
+    testSurrealQL(query, {
       sql: 'create person:100 set name = $1, company = $2, skills = $3',
       parameters: ['Tobie', 'SurrealDB', ['Rust', 'Go', 'JavaScript']],
     })
@@ -61,7 +61,7 @@ describe('SurrealKysely.create(...)', () => {
       skills: ['Rust', 'Go', 'JavaScript'],
     })
 
-    testSurrealQl(query, {
+    testSurrealQL(query, {
       sql: 'create person:tobie set name = $1, company = $2, skills = $3',
       parameters: ['Tobie', 'SurrealDB', ['Rust', 'Go', 'JavaScript']],
     })
@@ -84,7 +84,7 @@ describe('SurrealKysely.create(...)', () => {
       skills: ['Rust', 'Go', 'JavaScript'],
     })
 
-    testSurrealQl(query, {
+    testSurrealQL(query, {
       sql: 'create person content $1',
       parameters: [
         {
@@ -107,7 +107,7 @@ describe('SurrealKysely.create(...)', () => {
       skills: ['Rust', 'Go', 'JavaScript'],
     })
 
-    testSurrealQl(query, {
+    testSurrealQL(query, {
       sql: 'create person:tobie2 content $1',
       parameters: [
         {
@@ -138,7 +138,7 @@ describe('SurrealKysely.create(...)', () => {
       })
       .return('none')
 
-    testSurrealQl(query, {
+    testSurrealQL(query, {
       sql: 'create person set age = $1, username = $2 return none',
       parameters: [46, 'john-smith'],
     })
@@ -157,7 +157,7 @@ describe('SurrealKysely.create(...)', () => {
       })
       .return('diff')
 
-    testSurrealQl(query, {
+    testSurrealQL(query, {
       sql: 'create person set age = $1, username = $2 return diff',
       parameters: [46, 'john-smith'],
     })
@@ -176,7 +176,7 @@ describe('SurrealKysely.create(...)', () => {
       })
       .return('before')
 
-    testSurrealQl(query, {
+    testSurrealQL(query, {
       sql: 'create person set age = $1, username = $2 return before',
       parameters: [46, 'john-smith'],
     })
@@ -195,7 +195,7 @@ describe('SurrealKysely.create(...)', () => {
       })
       .return('after')
 
-    testSurrealQl(query, {
+    testSurrealQL(query, {
       sql: 'create person set age = $1, username = $2 return after',
       parameters: [46, 'john-smith'],
     })
@@ -215,7 +215,7 @@ describe('SurrealKysely.create(...)', () => {
       })
       .return('interests')
 
-    testSurrealQl(query, {
+    testSurrealQL(query, {
       sql: 'create person set age = $1, username = $2, interests = $3 return interests',
       parameters: [46, 'john-smith', ['skiing', 'music']],
     })
@@ -236,7 +236,7 @@ describe('SurrealKysely.create(...)', () => {
       })
       .return(['name', 'interests'])
 
-    testSurrealQl(query, {
+    testSurrealQL(query, {
       sql: 'create person set age = $1, username = $2, interests = $3 return name, interests',
       parameters: [46, 'john-smith', ['skiing', 'music']],
     })
@@ -254,7 +254,7 @@ describe('SurrealKysely.create(...)', () => {
       interests: ['skiing', 'music'],
     })
 
-    testSurrealQl(query, {
+    testSurrealQL(query, {
       sql: 'create person:recordid set age = $1, username = $2, interests = $3',
       parameters: [46, 'john-smith', ['skiing', 'music']],
     })
