@@ -58,7 +58,7 @@ Older node versions are supported as well, just swap [`undici`](https://github.c
 
 ```ts
 import {GeneratedAlways, Kysely} from 'kysely'
-import {SurrealDatabase, SurrealDbHttpDialect} from 'kysely-surrealdb'
+import {SurrealDatabase, SurrealDbHttpDialect, type SurrealEdge} from 'kysely-surrealdb'
 import {fetch} from 'undici'
 
 interface Database {
@@ -98,7 +98,7 @@ The awesomeness of Kysely, with some SurrealQL query builders patched in.
 
 ```ts
 import {GeneratedAlways, Kysely} from 'kysely'
-import {SurrealDbHttpDialect, SurrealKysely} from 'kysely-surrealdb'
+import {SurrealDbHttpDialect, SurrealKysely, type SurrealEdge} from 'kysely-surrealdb'
 import {fetch} from 'undici'
 
 interface Database {
