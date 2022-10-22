@@ -1,7 +1,7 @@
 import {expect} from 'chai'
 
 import type {SurrealKysely} from '../../../src'
-import {dropTable, getDb, testSurrealQl, type Database} from './shared'
+import {dropTables, getDb, testSurrealQl, type Database} from './shared'
 
 describe('SurrealKysely.create(...)', () => {
   let db: SurrealKysely<Database>
@@ -11,7 +11,7 @@ describe('SurrealKysely.create(...)', () => {
   })
 
   after(async () => {
-    await dropTable('person')
+    await dropTables(['person'])
   })
 
   it('should execute a create...set query with a random id.', async () => {

@@ -2,7 +2,7 @@ import {expect} from 'chai'
 import {sql} from 'kysely'
 
 import type {SurrealKysely} from '../../../src'
-import {dropTable, getDb, insertArticles, insertCompanies, insertUsers, testSurrealQl, type Database} from './shared'
+import {dropTables, getDb, prepareTables, testSurrealQl, type Database} from './shared'
 
 describe('SurrealKysely.relate(...)', () => {
   let db: SurrealKysely<Database>
@@ -10,17 +10,11 @@ describe('SurrealKysely.relate(...)', () => {
   before(async () => {
     db = getDb()
 
-    await insertUsers()
-    await insertArticles()
-    await insertCompanies()
+    await prepareTables(['user', 'article', 'company'])
   })
 
   after(async () => {
-    await dropTable('write')
-    await dropTable('like')
-    await dropTable('company')
-    await dropTable('user')
-    await dropTable('article')
+    await dropTables(['write', 'like', 'company', 'user', 'article'])
   })
 
   it('should execute a relate...set query between two specific records.', async () => {
@@ -227,5 +221,62 @@ describe('SurrealKysely.relate(...)', () => {
     const actual = await query.execute()
 
     expect(actual).to.be.an('array').which.has.lengthOf(1)
+  })
+
+  it('should execute a relate...set query between multiple specific records and a single outbound record.', async () => {
+    const query = db
+      .relate('like')
+      .from(['user:tobie', 'user:igal'])
+      .to('user:moshe')
+      .set({
+        'time.connected': sql`time::now()`,
+      })
+
+    testSurrealQl(query, {
+      sql: 'relate [user:tobie, user:igal] -> like -> user:moshe set time.connected = time::now()',
+      parameters: [],
+    })
+
+    const actual = await query.execute()
+
+    expect(actual).to.be.an('array').that.has.lengthOf(2)
+  })
+
+  it('should execute a relate...set query between a single specific record and multiple specific records.', async () => {
+    const query = db
+      .relate('like')
+      .from('user:tobie')
+      .to(['user:moshe', 'user:igal'])
+      .set({
+        'time.connected': sql`time::now()`,
+      })
+
+    testSurrealQl(query, {
+      sql: 'relate user:tobie -> like -> [user:moshe, user:igal] set time.connected = time::now()',
+      parameters: [],
+    })
+
+    const actual = await query.execute()
+
+    expect(actual).to.be.an('array').that.has.lengthOf(2)
+  })
+
+  it('should execute a relate...set query between multiple specific records and multiple specific records.', async () => {
+    const query = db
+      .relate('write')
+      .from(['user:tobie', 'user:igal'])
+      .to(['article:surreal', 'article:surrealql'])
+      .set({
+        'time.written': sql`time::now()`,
+      })
+
+    testSurrealQl(query, {
+      sql: 'relate [user:tobie, user:igal] -> write -> [article:surreal, article:surrealql] set time.written = time::now()',
+      parameters: [],
+    })
+
+    const actual = await query.execute()
+
+    expect(actual).to.be.an('array').that.has.lengthOf(4)
   })
 })
