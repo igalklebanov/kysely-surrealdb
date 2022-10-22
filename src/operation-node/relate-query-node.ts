@@ -1,14 +1,14 @@
 import type {ColumnUpdateNode, TableNode, ValueNode} from 'kysely'
 
-import type {VertexNode} from '../parser/vertex-expression-parser.js'
 import {freeze} from '../util/object-utils.js'
 import type {SurrealOperationNode} from './operation-node.js'
 import type {ReturnNode} from './return-node.js'
+import type {VertexNode} from './vertex-node.js'
 
 export interface RelateQueryNode extends SurrealOperationNode {
   readonly kind: 'RelateQueryNode'
   readonly from?: VertexNode
-  readonly table: TableNode
+  readonly edge: TableNode
   readonly to?: VertexNode
   readonly content?: ValueNode
   readonly set?: ReadonlyArray<ColumnUpdateNode>
@@ -20,10 +20,10 @@ export const RelateQueryNode = freeze({
     return node.kind === 'RelateQueryNode'
   },
 
-  create(table: TableNode): RelateQueryNode {
+  create(edge: TableNode): RelateQueryNode {
     return freeze({
       kind: 'RelateQueryNode',
-      table,
+      edge,
     })
   },
 
