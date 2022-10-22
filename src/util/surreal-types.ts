@@ -104,7 +104,7 @@ export type AnySpecificVertex<DB> = {
 }[keyof DB]
 
 export type AnyVertexGroup<DB> = {
-  [K in keyof DB]: DB[K] extends AnyEdge<DB>
+  [K in keyof DB]: K extends AnyEdge<DB>
     ? never
     : K extends `${string}:${string}`
     ? never
