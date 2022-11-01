@@ -57,7 +57,7 @@ To fix that, add an [`import_map.json`](https://deno.land/manual@v1.26.1/linking
 Older node versions are supported as well, just swap [`undici`](https://github.com/nodejs/undici) with [`node-fetch`](https://github.com/node-fetch/node-fetch).
 
 ```ts
-import {GeneratedAlways, Kysely} from 'kysely'
+import {Kysely} from 'kysely'
 import {SurrealDatabase, SurrealDbHttpDialect, type SurrealEdge} from 'kysely-surrealdb'
 import {fetch} from 'undici'
 
