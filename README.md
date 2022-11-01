@@ -97,7 +97,6 @@ const db = new Kysely<SurrealDatabase<Database>>({
 The awesomeness of Kysely, with some SurrealQL query builders patched in.
 
 ```ts
-import {GeneratedAlways, Kysely} from 'kysely'
 import {SurrealDbHttpDialect, SurrealKysely, type SurrealEdge} from 'kysely-surrealdb'
 import {fetch} from 'undici'
 
