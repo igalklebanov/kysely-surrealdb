@@ -1,7 +1,7 @@
 import {expect} from 'chai'
 
 import type {SurrealKysely} from '../../../src'
-import {dropTables, getDb, testSurrealQl, type Database} from './shared'
+import {dropTables, getDb, testSurrealQL, type Database} from './shared'
 
 describe('SurrealKysely.create(...)', () => {
   let db: SurrealKysely<Database>

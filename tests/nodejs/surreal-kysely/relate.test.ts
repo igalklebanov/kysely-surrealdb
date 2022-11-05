@@ -2,8 +2,7 @@ import {expect} from 'chai'
 import {sql} from 'kysely'
 
 import type {SurrealKysely} from '../../../src'
-import {dropTable, getDb, insertArticles, insertCompanies, insertUsers, testSurrealQL, type Database} from './shared'
-import {dropTables, getDb, prepareTables, testSurrealQl, type Database} from './shared'
+import {dropTables, getDb, prepareTables, testSurrealQL, type Database} from './shared'
 
 describe('SurrealKysely.relate(...)', () => {
   let db: SurrealKysely<Database>
@@ -233,7 +232,7 @@ describe('SurrealKysely.relate(...)', () => {
         'time.connected': sql`time::now()`,
       })
 
-    testSurrealQl(query, {
+    testSurrealQL(query, {
       sql: 'relate [user:tobie, user:igal] -> like -> user:moshe set time.connected = time::now()',
       parameters: [],
     })
@@ -252,7 +251,7 @@ describe('SurrealKysely.relate(...)', () => {
         'time.connected': sql`time::now()`,
       })
 
-    testSurrealQl(query, {
+    testSurrealQL(query, {
       sql: 'relate user:tobie -> like -> [user:moshe, user:igal] set time.connected = time::now()',
       parameters: [],
     })
@@ -271,7 +270,7 @@ describe('SurrealKysely.relate(...)', () => {
         'time.written': sql`time::now()`,
       })
 
-    testSurrealQl(query, {
+    testSurrealQL(query, {
       sql: 'relate [user:tobie, user:igal] -> write -> [article:surreal, article:surrealql] set time.written = time::now()',
       parameters: [],
     })
