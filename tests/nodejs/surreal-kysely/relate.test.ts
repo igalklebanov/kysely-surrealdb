@@ -2,7 +2,7 @@ import {expect} from 'chai'
 import {sql} from 'kysely'
 
 import type {SurrealKysely} from '../../../src'
-import {dropTables, getDb, prepareTables, testSurrealQl, type Database} from './shared'
+import {dropTables, getDb, prepareTables, testSurrealQL, type Database} from './shared'
 
 describe('SurrealKysely.relate(...)', () => {
   let db: SurrealKysely<Database>
@@ -26,7 +26,7 @@ describe('SurrealKysely.relate(...)', () => {
         'time.written': sql`time::now()`,
       })
 
-    testSurrealQl(query, {
+    testSurrealQL(query, {
       sql: 'relate user:tobie -> write -> article:surreal set time.written = time::now()',
       parameters: [],
     })
@@ -50,7 +50,7 @@ describe('SurrealKysely.relate(...)', () => {
         'time.connected': sql`time::now()`,
       })
 
-    testSurrealQl(query, {
+    testSurrealQL(query, {
       sql: 'relate $1 -> like -> $2 set time.connected = time::now()',
       parameters: [
         'SURREALQL::(select users from company:surrealdb)',
@@ -70,7 +70,7 @@ describe('SurrealKysely.relate(...)', () => {
       .to('article:surreal')
       .content(sql`{source: 'Apple notes', tags: ['notes', 'markdown'], time: {written: time::now()}}`)
 
-    testSurrealQl(query, {
+    testSurrealQL(query, {
       sql: [
         'relate user:tobie -> write -> article:surreal',
         "content {source: 'Apple notes', tags: ['notes', 'markdown'], time: {written: time::now()}}",
@@ -92,7 +92,7 @@ describe('SurrealKysely.relate(...)', () => {
         'time.written': sql`time::now()`,
       })
 
-    testSurrealQl(query, {
+    testSurrealQL(query, {
       sql: 'relate user:tobie -> write -> article:surrealql set time.written = time::now()',
       parameters: [],
     })
@@ -112,7 +112,7 @@ describe('SurrealKysely.relate(...)', () => {
       })
       .return('none')
 
-    testSurrealQl(query, {
+    testSurrealQL(query, {
       sql: 'relate user:tobie -> write -> article:surreal set time.written = time::now() return none',
       parameters: [],
     })
@@ -132,7 +132,7 @@ describe('SurrealKysely.relate(...)', () => {
       })
       .return('diff')
 
-    testSurrealQl(query, {
+    testSurrealQL(query, {
       sql: 'relate user:tobie -> write -> article:surreal set time.written = time::now() return diff',
       parameters: [],
     })
@@ -152,7 +152,7 @@ describe('SurrealKysely.relate(...)', () => {
       })
       .return('before')
 
-    testSurrealQl(query, {
+    testSurrealQL(query, {
       sql: 'relate user:tobie -> write -> article:surreal set time.written = time::now() return before',
       parameters: [],
     })
@@ -172,7 +172,7 @@ describe('SurrealKysely.relate(...)', () => {
       })
       .return('after')
 
-    testSurrealQl(query, {
+    testSurrealQL(query, {
       sql: 'relate user:tobie -> write -> article:surreal set time.written = time::now() return after',
       parameters: [],
     })
@@ -192,7 +192,7 @@ describe('SurrealKysely.relate(...)', () => {
       })
       .return('time')
 
-    testSurrealQl(query, {
+    testSurrealQL(query, {
       sql: 'relate user:tobie -> write -> article:surreal set time.written = time::now() return time',
       parameters: [],
     })
@@ -213,7 +213,7 @@ describe('SurrealKysely.relate(...)', () => {
       })
       .return(['source', 'time'])
 
-    testSurrealQl(query, {
+    testSurrealQL(query, {
       sql: 'relate user:tobie -> write -> article:surreal set source = $1, time.written = time::now() return source, time',
       parameters: ['Samsung notes'],
     })
@@ -232,7 +232,7 @@ describe('SurrealKysely.relate(...)', () => {
         'time.connected': sql`time::now()`,
       })
 
-    testSurrealQl(query, {
+    testSurrealQL(query, {
       sql: 'relate [user:tobie, user:igal] -> like -> user:moshe set time.connected = time::now()',
       parameters: [],
     })
@@ -251,7 +251,7 @@ describe('SurrealKysely.relate(...)', () => {
         'time.connected': sql`time::now()`,
       })
 
-    testSurrealQl(query, {
+    testSurrealQL(query, {
       sql: 'relate user:tobie -> like -> [user:moshe, user:igal] set time.connected = time::now()',
       parameters: [],
     })
@@ -270,7 +270,7 @@ describe('SurrealKysely.relate(...)', () => {
         'time.written': sql`time::now()`,
       })
 
-    testSurrealQl(query, {
+    testSurrealQL(query, {
       sql: 'relate [user:tobie, user:igal] -> write -> [article:surreal, article:surrealql] set time.written = time::now()',
       parameters: [],
     })
