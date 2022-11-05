@@ -19,7 +19,7 @@ import {
 import {parseVertexExpression, type VertexExpression} from '../parser/vertex-expression-parser.js'
 import {preventAwait} from '../util/prevent-await.js'
 import type {QueryId} from '../util/query-id.js'
-import type {AnyTable, SurrealRecordId} from '../util/surreal-types.js'
+import type {AnySpecificVertex, AnyVertexGroup} from '../util/surreal-types.js'
 import type {MergePartial} from '../util/type-utils.js'
 import type {ReturnInterface} from './return-interface.js'
 import type {SetContentInterface} from './set-content-interface.js'
@@ -34,15 +34,41 @@ export class RelateQueryBuilder<DB, TB extends keyof DB, O = DB[TB]>
   }
 
   /**
+   * Sets the given record/s as inbound vertex/vertices of a {@link SurrealKysely.relate | relate} query's edge.
    *
+   * To set outbound vertex/vertices, see {@link from}.
+   *
+   * ### Examples
+   *
+   * ```ts
+   * import {sql} from 'kysely'
+   *
+   * const relation = await db
+   *   .relate('write')
+   *   .from('user:tobie')
+   *   .to('article:surreal')
+   *   .set({
+   *     'time.written': sql`time::now()`,
+   *   })
+   *   .executeTakeFirst()
+   * ```
+   *
+   * The generated SurrealQL:
+   *
+   * ```sql
+   * relate user:tobie -> write -> article:surreal
+   * set time.written = time::now();
+   * ```
    */
-  from(table: AnyTable<DB>, id: string | number): RelateQueryBuilder<DB, TB, O>
+  from(table: AnyVertexGroup<DB>, id: string | number): RelateQueryBuilder<DB, TB, O>
 
-  from(record: SurrealRecordId<DB>): RelateQueryBuilder<DB, TB, O>
+  from(record: AnySpecificVertex<DB>): RelateQueryBuilder<DB, TB, O>
+
+  from(records: ReadonlyArray<AnySpecificVertex<DB>>): RelateQueryBuilder<DB, TB, O>
 
   from(expression: AnySelectQueryBuilder | RawBuilder<any>): RelateQueryBuilder<DB, TB, O>
 
-  from(target: AnyTable<DB> | VertexExpression<DB>, id?: string | number): any {
+  from(target: AnyVertexGroup<DB> | VertexExpression<DB>, id?: string | number): any {
     const expression = id !== undefined ? `${String(target)}:${id}` : target
 
     return new RelateQueryBuilder({
@@ -52,15 +78,41 @@ export class RelateQueryBuilder<DB, TB extends keyof DB, O = DB[TB]>
   }
 
   /**
+   * Sets the given record/s as outbound vertex/vertices of a {@link SurrealKysely.relate | relate} query's edge.
    *
+   * To set inbound vertex/vertices, see {@link to}.
+   *
+   * ### Examples:
+   *
+   * ```ts
+   * import {sql} from 'kysely'
+   *
+   * const relation = await db
+   *   .relate('write')
+   *   .from('user:tobie')
+   *   .to('article:surreal')
+   *   .set({
+   *     'time.written': sql`time::now()`,
+   *   })
+   *   .executeTakeFirst()
+   * ```
+   *
+   * The generated SurrealQL:
+   *
+   * ```sql
+   * relate user:tobie -> write -> article:surreal
+   * set time.written = time::now();
+   * ```
    */
-  to(table: AnyTable<DB>, id: string | number): RelateQueryBuilder<DB, TB, O>
+  to(table: AnyVertexGroup<DB>, id: string | number): RelateQueryBuilder<DB, TB, O>
 
-  to(record: SurrealRecordId<DB>): RelateQueryBuilder<DB, TB, O>
+  to(record: AnySpecificVertex<DB>): RelateQueryBuilder<DB, TB, O>
+
+  to(records: ReadonlyArray<AnySpecificVertex<DB>>): RelateQueryBuilder<DB, TB, O>
 
   to(expression: AnySelectQueryBuilder | RawBuilder<any>): RelateQueryBuilder<DB, TB, O>
 
-  to(target: AnyTable<DB> | VertexExpression<DB>, id?: string | number): any {
+  to(target: AnyVertexGroup<DB> | VertexExpression<DB>, id?: string | number): any {
     const expression = id !== undefined ? `${String(target)}:${id}` : target
 
     return new RelateQueryBuilder({

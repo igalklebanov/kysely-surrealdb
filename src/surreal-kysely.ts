@@ -5,7 +5,7 @@ import {RelateQueryNode} from './operation-node/relate-query-node.js'
 import {CreateQueryBuilder} from './query-builder/create-query-builder.js'
 import {RelateQueryBuilder} from './query-builder/relate-query-builder.js'
 import {createQueryId} from './util/query-id.js'
-import type {SurrealDatabase, SurrealRecordId} from './util/surreal-types.js'
+import type {AnyEdge, SurrealDatabase, SurrealRecordId} from './util/surreal-types.js'
 
 /**
  * The main SurrealKysely class.
@@ -24,13 +24,11 @@ import type {SurrealDatabase, SurrealRecordId} from './util/surreal-types.js'
  * import {fetch} from 'undici'
  *
  * interface Person {
- *   id: Generated<string>
  *   first_name: string
  *   last_name: string
  * }
  *
  * interface Pet {
- *   id: Generated<string>
  *   name: string
  *   species: 'cat' | 'dog'
  * }
@@ -43,7 +41,7 @@ import type {SurrealDatabase, SurrealRecordId} from './util/surreal-types.js'
  *
  * interface Database {
  *   person: Person
- *   own: Own
+ *   own: SurrealEdge<Own>
  *   pet: Pet
  * }
  *
@@ -122,8 +120,8 @@ export class SurrealKysely<DB> extends Kysely<SurrealDatabase<DB>> {
     const ref = id !== undefined ? `${String(target)}:${id}` : String(target)
 
     return new CreateQueryBuilder({
-      queryId: createQueryId(),
       executor: this.getExecutor(),
+      queryId: createQueryId(),
       queryNode: CreateQueryNode.create(TableNode.create(ref)),
     })
   }
@@ -131,8 +129,10 @@ export class SurrealKysely<DB> extends Kysely<SurrealDatabase<DB>> {
   /**
    * Creates a relate query.
    *
-   * This query returns the create relation by default. See the {@link RelateQueryBuilder.return | return}
+   * This query returns the created relation by default. See the {@link RelateQueryBuilder.return | return}
    * method for a way to control the returned data.
+   *
+   * This method only accepts tables that are defined as {@link SurrealEdge}s.
    *
    * ### Examples
    *
@@ -184,11 +184,11 @@ export class SurrealKysely<DB> extends Kysely<SurrealDatabase<DB>> {
    * relate $1 -> like -> $2 set time.connected = time::now();
    * ```
    */
-  relate<TB extends keyof DB>(table: TB): RelateQueryBuilder<SurrealDatabase<DB>, TB> {
+  relate<E extends AnyEdge<DB>>(edge: E): RelateQueryBuilder<SurrealDatabase<DB>, E> {
     return new RelateQueryBuilder({
-      queryId: createQueryId(),
       executor: this.getExecutor(),
-      queryNode: RelateQueryNode.create(TableNode.create(table as string)),
+      queryId: createQueryId(),
+      queryNode: RelateQueryNode.create(TableNode.create(edge)),
     })
   }
 }
