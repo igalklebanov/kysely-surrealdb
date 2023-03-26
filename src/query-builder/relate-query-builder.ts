@@ -25,7 +25,7 @@ import type {ReturnInterface} from './return-interface.js'
 import type {SetContentInterface} from './set-content-interface.js'
 
 export class RelateQueryBuilder<DB, TB extends keyof DB, O = DB[TB]>
-  implements Compilable, ReturnInterface<DB, TB, O>, SetContentInterface<DB, TB, O>
+  implements Compilable<O>, ReturnInterface<DB, TB, O>, SetContentInterface<DB, TB, O>
 {
   readonly #props: RelateQueryBuilderProps
 
@@ -161,12 +161,19 @@ export class RelateQueryBuilder<DB, TB extends keyof DB, O = DB[TB]>
    *
    * db.updateTable('person')
    *   .set(values)
-   *   .call(log)
+   *   .$call(log)
    *   .execute()
    * ```
    */
-  call<T>(func: (qb: this) => T): T {
+  $call<T>(func: (qb: this) => T): T {
     return func(this)
+  }
+
+  /**
+   * @deprecated Use {@link $call} instead.
+   */
+  call<T>(func: (qb: this) => T): T {
+    return this.$call(func)
   }
 
   /**
@@ -187,7 +194,7 @@ export class RelateQueryBuilder<DB, TB extends keyof DB, O = DB[TB]>
    *     .create('person')
    *     .set(values)
    *     .return(['id', 'first_name'])
-   *     .if(returnLastName, (qb) => qb.return('last_name'))
+   *     .$if(returnLastName, (qb) => qb.return('last_name'))
    *     .executeTakeFirstOrThrow()
    * }
    * ```
@@ -204,7 +211,7 @@ export class RelateQueryBuilder<DB, TB extends keyof DB, O = DB[TB]>
    * }
    * ```
    */
-  if<O2>(
+  $if<O2>(
     condition: boolean,
     func: (qb: this) => RelateQueryBuilder<DB, TB, O2>,
   ): RelateQueryBuilder<DB, TB, MergePartial<O, O2>> {
@@ -218,23 +225,47 @@ export class RelateQueryBuilder<DB, TB extends keyof DB, O = DB[TB]>
   }
 
   /**
+   * @deprecated Use {@link $if} instead.
+   */
+  if<O2>(
+    condition: boolean,
+    func: (qb: this) => RelateQueryBuilder<DB, TB, O2>,
+  ): RelateQueryBuilder<DB, TB, MergePartial<O, O2>> {
+    return this.$if(condition, func)
+  }
+
+  /**
    * Change the output type of the query.
    *
    * You should only use this method as the last resort if the types don't support
    * your use case.
    */
-  castTo<T>(): RelateQueryBuilder<DB, TB, T> {
+  $castTo<T>(): RelateQueryBuilder<DB, TB, T> {
     return new RelateQueryBuilder(this.#props)
+  }
+
+  /**
+   * @deprecated Use {@link $castTo} instead.
+   */
+  castTo<T>(): RelateQueryBuilder<DB, TB, T> {
+    return this.$castTo()
   }
 
   /**
    * Returns a copy of this RelateQueryBuilder instance with the given plugin installed.
    */
-  withPlugin(plugin: KyselyPlugin): RelateQueryBuilder<DB, TB, O> {
+  $withPlugin(plugin: KyselyPlugin): RelateQueryBuilder<DB, TB, O> {
     return new RelateQueryBuilder({
       ...this.#props,
       executor: this.#props.executor.withPlugin(plugin),
     })
+  }
+
+  /**
+   * @deprecated Use {@link $withPlugin} instead.
+   */
+  withPlugin(plugin: KyselyPlugin): RelateQueryBuilder<DB, TB, O> {
+    return this.$withPlugin(plugin)
   }
 
   toOperationNode(): RelateQueryNode {
@@ -283,7 +314,7 @@ export class RelateQueryBuilder<DB, TB extends keyof DB, O = DB[TB]>
       throw new errorConstructor(this.toOperationNode() as any)
     }
 
-    return result as O
+    return result
   }
 }
 
