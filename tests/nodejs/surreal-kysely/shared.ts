@@ -1,21 +1,20 @@
 import {expect} from 'chai'
-import {RawBuilder, sql, type ColumnType, type Compilable, type GeneratedAlways} from 'kysely'
+import {sql, type ColumnType, type Compilable, type RawBuilder} from 'kysely'
 import nodeFetch from 'node-fetch'
 import {fetch as undiciFetch} from 'undici'
 
-import {SurrealDbHttpDialect, SurrealKysely, type SurrealDbHttpDialectConfig} from '../../../src'
+import {SurrealDbHttpDialect, SurrealKysely, type SurrealDbHttpDialectConfig, type SurrealEdge} from '../../../src'
 
 export interface Database {
   person: Person
   user: User
-  write: Write
+  write: SurrealEdge<Write>
   article: Article
   company: Company
-  like: Like
+  like: SurrealEdge<Like>
 }
 
 interface Person {
-  id: GeneratedAlways<string>
   name: string | null
   company: string | null
   skills: string[] | null
@@ -39,12 +38,9 @@ interface Write {
   >
 }
 
-interface Article {
-  id: GeneratedAlways<string>
-}
+interface Article {}
 
 interface Company {
-  id: GeneratedAlways<string>
   users: any
 }
 
@@ -91,11 +87,41 @@ export function testSurrealQl(actual: Compilable, expected: {parameters: unknown
   expect(compiledQuery.parameters).to.be.deep.equal(expected.parameters)
 }
 
-export async function dropTable(table: keyof Database): Promise<void> {
+export async function prepareTables(tables: ReadonlyArray<keyof Database>): Promise<void> {
+  return await tables.reduce(async (acc, table) => {
+    switch (table) {
+      case 'article':
+        return acc.then(insertArticles)
+      case 'company':
+        return acc.then(insertCompanies)
+      case 'like':
+        // return acc.then(insertLikes)
+        return acc
+      case 'person':
+        // return acc.then(insertPeople)
+        return acc
+      case 'user':
+        return acc.then(insertUsers)
+      case 'write':
+        // return acc.then(insertWrites)
+        return acc
+      default:
+        throw new Error(`missing insertion function for ${table}!`)
+    }
+  }, Promise.resolve())
+}
+
+export async function dropTables(tables: ReadonlyArray<keyof Database>): Promise<void> {
+  return await tables.reduce(async (acc, table) => {
+    return acc.then(() => dropTable(table))
+  }, Promise.resolve())
+}
+
+async function dropTable(table: keyof Database): Promise<void> {
   await sql`remove table ${sql.table(table)}`.execute(getDb())
 }
 
-export async function insertUsers(): Promise<void> {
+async function insertUsers(): Promise<void> {
   await getDb()
     .insertInto('user')
     .values([
@@ -106,7 +132,7 @@ export async function insertUsers(): Promise<void> {
     .execute()
 }
 
-export async function insertArticles(): Promise<void> {
+async function insertArticles(): Promise<void> {
   await getDb()
     .insertInto('article')
     .values([
@@ -116,7 +142,7 @@ export async function insertArticles(): Promise<void> {
     .execute()
 }
 
-export async function insertCompanies(): Promise<void> {
+async function insertCompanies(): Promise<void> {
   await getDb()
     .insertInto('company')
     .values([{id: 'surrealdb', users: sql`user:igal`}])
