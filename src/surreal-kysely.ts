@@ -1,8 +1,10 @@
-import {Kysely, TableNode} from 'kysely'
+import {Kysely, TableNode, type Expression} from 'kysely'
 
 import {CreateQueryNode} from './operation-node/create-query-node.js'
+import {IfElseQueryNode} from './operation-node/if-else-query-node.js'
 import {RelateQueryNode} from './operation-node/relate-query-node.js'
 import {CreateQueryBuilder} from './query-builder/create-query-builder.js'
+import {IfElseQueryBuilder} from './query-builder/if-else-query-builder.js'
 import {RelateQueryBuilder} from './query-builder/relate-query-builder.js'
 import {createQueryId} from './util/query-id.js'
 import type {AnyEdge, SurrealDatabase, SurrealRecordId} from './util/surreal-types.js'
@@ -123,6 +125,14 @@ export class SurrealKysely<DB> extends Kysely<SurrealDatabase<DB>> {
       executor: this.getExecutor(),
       queryId: createQueryId(),
       queryNode: CreateQueryNode.create(TableNode.create(ref)),
+    })
+  }
+
+  ifThen<O>(condition: Expression<boolean>, expression: Expression<O>): IfElseQueryBuilder<O> {
+    return new IfElseQueryBuilder({
+      executor: this.getExecutor(),
+      queryId: createQueryId(),
+      queryNode: IfElseQueryNode.create(condition.toOperationNode(), expression.toOperationNode()),
     })
   }
 
