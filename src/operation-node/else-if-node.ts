@@ -1,4 +1,4 @@
-import type {FilterNode} from 'kysely'
+import type {BinaryOperationNode} from 'kysely'
 
 import {freeze} from '../util/object-utils.js'
 import type {ThenNode} from './if-else-query-node.js'
@@ -6,7 +6,7 @@ import type {SurrealOperationNode} from './operation-node.js'
 
 export interface ElseIfNode extends SurrealOperationNode {
   readonly kind: 'ElseIfNode'
-  readonly if: FilterNode
+  readonly if: BinaryOperationNode
   readonly then?: ThenNode
 }
 
@@ -15,7 +15,7 @@ export const ElseIfNode = freeze({
     return node.kind === 'ElseIfNode'
   },
 
-  create(iff: FilterNode): ElseIfNode {
+  create(iff: BinaryOperationNode): ElseIfNode {
     return freeze({
       kind: 'ElseIfNode',
       if: iff,
