@@ -38,8 +38,11 @@ export class SurrealDbHttpConnection implements DatabaseConnection {
       throw new SurrealDbHttpDatabaseError(queryResult.detail)
     }
 
+    const rows = queryResult?.result || []
+
     return {
-      rows: queryResult?.result ?? [],
+      numAffectedRows: BigInt(rows.length),
+      rows,
     }
   }
 
