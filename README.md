@@ -41,7 +41,7 @@ To fix that, add an [`import_map.json`](https://deno.land/manual@v1.26.1/linking
 ```json
 {
   "imports": {
-    "kysely": "https://cdn.jsdelivr.net/npm/kysely@0.22.0/dist/esm/index.js"
+    "kysely": "https://cdn.jsdelivr.net/npm/kysely@0.23.5/dist/esm/index.js"
   }
 }
 ```
@@ -140,7 +140,9 @@ await db
 
 #### Supported SurrealQL specific statements:
 
-[create](https://surrealdb.com/docs/surrealql/statements/create), [relate](https://surrealdb.com/docs/surrealql/statements/relate).
+[create](https://surrealdb.com/docs/surrealql/statements/create), 
+[if else](https://surrealdb.com/docs/surrealql/statements/ifelse),
+[relate](https://surrealdb.com/docs/surrealql/statements/relate).
 
 #### Why not write a query builder from scratch
 
