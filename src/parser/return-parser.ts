@@ -1,7 +1,6 @@
-import {AnyColumn, ColumnNode, SelectType} from 'kysely'
-import {ExtractColumnType} from 'kysely/dist/cjs/util/type-utils.js'
+import {ColumnNode, type AnyColumn, type SelectType} from 'kysely'
 
-import {ReturnNode, SurrealReturnType} from '../operation-node/return-node.js'
+import {ReturnNode, type SurrealReturnType} from '../operation-node/return-node.js'
 
 export type ReturnExpression<DB, TB extends keyof DB> =
   | SurrealReturnType
@@ -26,6 +25,10 @@ export type ExtractTypeFromReturnExpression<
     ? {[K in RE[number]]: SelectType<ExtractColumnType<DB, TB, K>>}
     : O & {[K in RE[number]]: SelectType<ExtractColumnType<DB, TB, RE>>}
   : unknown
+
+type ExtractColumnType<DB, TB extends keyof DB, C> = {
+  [T in TB]: C extends keyof DB[T] ? DB[T][C] : never
+}[TB]
 
 export function parseReturnExpression(expression: ReturnExpression<any, any>): ReturnNode {
   if (isSurrealReturnType(expression)) {
