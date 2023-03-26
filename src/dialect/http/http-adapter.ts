@@ -11,11 +11,11 @@ export class SurrealDbHttpAdapter extends DialectAdapterBase {
     return false
   }
 
-  async acquireMigrationLock(db: Kysely<any>): Promise<void> {
+  async acquireMigrationLock(_: Kysely<any>): Promise<void> {
     this.#throwLocksError()
   }
 
-  async releaseMigrationLock(db: Kysely<any>): Promise<void> {
+  async releaseMigrationLock(_: Kysely<any>): Promise<void> {
     this.#throwLocksError()
   }
 

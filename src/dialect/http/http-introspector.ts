@@ -41,6 +41,7 @@ export class SurrealDbHttpIntrospector implements DatabaseIntrospector {
             isNullable: true,
             name,
           })),
+          isView: false,
           name: tableName,
         }
       }),
