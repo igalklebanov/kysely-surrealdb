@@ -1,4 +1,4 @@
-import {ColumnUpdateNode, TableNode, ValueNode} from 'kysely'
+import type {ColumnUpdateNode, TableNode, ValueNode} from 'kysely'
 
 import {freeze} from '../util/object-utils.js'
 import type {SurrealOperationNode} from './operation-node.js'

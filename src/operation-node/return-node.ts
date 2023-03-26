@@ -10,6 +10,9 @@ export interface ReturnNode extends SurrealOperationNode {
   readonly return: SurrealReturnType | ReadonlyArray<ColumnNode>
 }
 
+/**
+ * @internal
+ */
 export const ReturnNode = freeze({
   is(node: SurrealOperationNode): node is ReturnNode {
     return node.kind === 'ReturnNode'
