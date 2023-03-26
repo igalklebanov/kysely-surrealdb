@@ -12,6 +12,7 @@ export interface Database {
   article: Article
   company: Company
   like: SurrealEdge<Like>
+  account: Account
 }
 
 interface Person {
@@ -20,6 +21,8 @@ interface Person {
   skills: string[] | null
   username: string | null
   interests: string[] | null
+  railcard: string | null
+  age: number | null
 }
 
 interface User {
@@ -48,6 +51,10 @@ interface Like {
   time: {
     connected: string | null
   } | null
+}
+
+export interface Account {
+  name: string
 }
 
 export function getDb(config?: Partial<SurrealDbHttpDialectConfig>): SurrealKysely<Database> {
@@ -90,6 +97,8 @@ export function testSurrealQl(actual: Compilable, expected: {parameters: unknown
 export async function prepareTables(tables: ReadonlyArray<keyof Database>): Promise<void> {
   return await tables.reduce(async (acc, table) => {
     switch (table) {
+      case 'account':
+        return acc.then(insertAccounts)
       case 'article':
         return acc.then(insertArticles)
       case 'company':
@@ -98,8 +107,7 @@ export async function prepareTables(tables: ReadonlyArray<keyof Database>): Prom
         // return acc.then(insertLikes)
         return acc
       case 'person':
-        // return acc.then(insertPeople)
-        return acc
+        return acc.then(insertPeople)
       case 'user':
         return acc.then(insertUsers)
       case 'write':
@@ -146,5 +154,22 @@ async function insertCompanies(): Promise<void> {
   await getDb()
     .insertInto('company')
     .values([{id: 'surrealdb', users: sql`user:igal`}])
+    .execute()
+}
+
+async function insertPeople(): Promise<void> {
+  await getDb()
+    .insertInto('person')
+    .values([{age: 10}, {age: 21}, {age: 30}, {age: 65}])
+    .execute()
+}
+
+async function insertAccounts(): Promise<void> {
+  await getDb()
+    .insertInto('account')
+    .values([
+      {id: 'account:123', name: 'Account 123'},
+      {id: 'account:456', name: 'Account 456'},
+    ])
     .execute()
 }
