@@ -4,7 +4,7 @@ import {
   isOperationNodeSource,
   ValueNode,
   type InsertObject,
-  type ValueExpressionNode,
+  type OperationNode,
 } from 'kysely'
 
 export type CreateObject<DB, TB extends keyof DB> = InsertObject<DB, TB>
@@ -15,7 +15,7 @@ export function parseSetObject(row: CreateObject<any, any>): ReadonlyArray<Colum
     .map(([key, value]) => ColumnUpdateNode.create(ColumnNode.create(key), parseSetObjectValue(value)))
 }
 
-function parseSetObjectValue(value: unknown): ValueExpressionNode {
+function parseSetObjectValue(value: unknown): OperationNode {
   if (isOperationNodeSource(value)) {
     return value.toOperationNode() as any
   }

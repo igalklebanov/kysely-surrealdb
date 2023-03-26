@@ -8,6 +8,8 @@ import {
 } from 'kysely'
 
 import type {CreateQueryNode} from '../operation-node/create-query-node.js'
+import type {ElseIfNode} from '../operation-node/else-if-node.js'
+import type {IfElseQueryNode} from '../operation-node/if-else-query-node.js'
 import {
   isSurrealOperationNode,
   type SurrealOperationNode,
@@ -37,6 +39,8 @@ export class SurrealDbQueryCompiler extends DefaultQueryCompiler {
 
   readonly #surrealVisitors: Record<SurrealOperationNodeKind, Function> = freeze({
     CreateQueryNode: this.visitCreateQuery.bind(this),
+    ElseIfNode: this.visitElseIf.bind(this),
+    IfElseQueryNode: this.visitIfElseQuery.bind(this),
     RelateQueryNode: this.visitRelateQuery.bind(this),
     ReturnNode: this.visitReturn.bind(this),
     VertexNode: this.visitVertex.bind(this),
@@ -71,6 +75,38 @@ export class SurrealDbQueryCompiler extends DefaultQueryCompiler {
       this.append(' ')
       this.visitNode(node.return as any)
     }
+  }
+
+  protected visitElseIf(node: ElseIfNode): void {
+    this.append('else if ')
+    this.visitNode(node.if)
+
+    if (node.then) {
+      this.append(' then ')
+      this.visitNode(node.then as any)
+    }
+  }
+
+  protected visitIfElseQuery(node: IfElseQueryNode): void {
+    this.append('if ')
+    this.visitNode(node.if)
+
+    if (node.then) {
+      this.append(' then ')
+      this.visitNode(node.then as any)
+    }
+
+    if (node.elseIf && node.elseIf.length > 0) {
+      this.append(' ')
+      this.compileList(node.elseIf as any, ' ')
+    }
+
+    if (node.else) {
+      this.append(' else ')
+      this.visitNode(node.else as any)
+    }
+
+    this.append(' end')
   }
 
   protected override visitOffset(node: OffsetNode): void {

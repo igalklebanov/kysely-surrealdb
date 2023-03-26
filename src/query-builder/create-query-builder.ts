@@ -21,9 +21,9 @@ import type {ReturnInterface} from './return-interface.js'
 import type {SetContentInterface} from './set-content-interface.js'
 
 export class CreateQueryBuilder<DB, TB extends keyof DB, O = DB[TB]>
-  implements Compilable, ReturnInterface<DB, TB, O>, SetContentInterface<DB, TB, O>
+  implements Compilable<O>, ReturnInterface<DB, TB, O>, SetContentInterface<DB, TB, O>
 {
-  #props: CreateQueryBuilderProps
+  readonly #props: CreateQueryBuilderProps
 
   constructor(props: CreateQueryBuilderProps) {
     this.#props = props
@@ -69,12 +69,19 @@ export class CreateQueryBuilder<DB, TB extends keyof DB, O = DB[TB]>
    *
    * db.updateTable('person')
    *   .set(values)
-   *   .call(log)
+   *   .$call(log)
    *   .execute()
    * ```
    */
-  call<T>(func: (qb: this) => T): T {
+  $call<T>(func: (qb: this) => T): T {
     return func(this)
+  }
+
+  /**
+   * @deprecated Use {@link $call} instead.
+   */
+  call<T>(func: (qb: this) => T): T {
+    return this.$call(func)
   }
 
   /**
@@ -95,7 +102,7 @@ export class CreateQueryBuilder<DB, TB extends keyof DB, O = DB[TB]>
    *     .create('person')
    *     .set(values)
    *     .return(['id', 'first_name'])
-   *     .if(returnLastName, (qb) => qb.return('last_name'))
+   *     .$if(returnLastName, (qb) => qb.return('last_name'))
    *     .executeTakeFirstOrThrow()
    * }
    * ```
@@ -112,7 +119,7 @@ export class CreateQueryBuilder<DB, TB extends keyof DB, O = DB[TB]>
    * }
    * ```
    */
-  if<O2>(
+  $if<O2>(
     condition: boolean,
     func: (qb: this) => CreateQueryBuilder<DB, TB, O2>,
   ): CreateQueryBuilder<DB, TB, MergePartial<O, O2>> {
@@ -126,23 +133,47 @@ export class CreateQueryBuilder<DB, TB extends keyof DB, O = DB[TB]>
   }
 
   /**
+   * @deprecated Use the {@link $if} method instead.
+   */
+  if<O2>(
+    condition: boolean,
+    func: (qb: this) => CreateQueryBuilder<DB, TB, O2>,
+  ): CreateQueryBuilder<DB, TB, MergePartial<O, O2>> {
+    return this.$if(condition, func)
+  }
+
+  /**
    * Change the output type of the query.
    *
    * You should only use this method as the last resort if the types don't support
    * your use case.
    */
-  castTo<T>(): CreateQueryBuilder<DB, TB, T> {
+  $castTo<T>(): CreateQueryBuilder<DB, TB, T> {
     return new CreateQueryBuilder(this.#props)
+  }
+
+  /**
+   * @deprecated Use the {@link $castTo} method instead.
+   */
+  castTo<T>(): CreateQueryBuilder<DB, TB, T> {
+    return this.$castTo()
   }
 
   /**
    * Returns a copy of this CreateQueryBuilder instance with the given plugin installed.
    */
-  withPlugin(plugin: KyselyPlugin): CreateQueryBuilder<DB, TB, O> {
+  $withPlugin(plugin: KyselyPlugin): CreateQueryBuilder<DB, TB, O> {
     return new CreateQueryBuilder({
       ...this.#props,
       executor: this.#props.executor.withPlugin(plugin),
     })
+  }
+
+  /**
+   * @deprecated Use the {@link $withPlugin} method instead.
+   */
+  withPlugin(plugin: KyselyPlugin): CreateQueryBuilder<DB, TB, O> {
+    return this.$withPlugin(plugin)
   }
 
   toOperationNode(): CreateQueryNode {

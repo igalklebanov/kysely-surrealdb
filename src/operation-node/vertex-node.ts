@@ -10,6 +10,9 @@ export interface VertexNode extends SurrealOperationNode {
   readonly vertex: VertexExpressionNode
 }
 
+/**
+ * @internal
+ */
 export const VertexNode = freeze({
   is(node: SurrealOperationNode): node is VertexNode {
     return node.kind === 'VertexNode'

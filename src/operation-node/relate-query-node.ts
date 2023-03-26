@@ -15,6 +15,9 @@ export interface RelateQueryNode extends SurrealOperationNode {
   readonly return?: ReturnNode
 }
 
+/**
+ * @internal
+ */
 export const RelateQueryNode = freeze({
   is(node: SurrealOperationNode): node is RelateQueryNode {
     return node.kind === 'RelateQueryNode'
