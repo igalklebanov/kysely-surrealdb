@@ -22,6 +22,7 @@ specifiers:
   prettier: ^2.7.1
   prettier-plugin-organize-imports: ^3.1.1
   prettier-plugin-pkg: ^0.17.1
+  surrealdb.js: ^0.5.0
   tsup: ^6.2.3
   typescript: ^4.8.4
   undici: ^5.11.0
@@ -48,6 +49,7 @@ devDependencies:
   prettier: 2.7.1
   prettier-plugin-organize-imports: 3.1.1_dmjzcauo3cshxeipj7bv64ktgm
   prettier-plugin-pkg: 0.17.1_prettier@2.7.1
+  surrealdb.js: 0.5.0
   tsup: 6.2.3_typescript@4.8.4
   typescript: 4.8.4
   undici: 5.11.0
@@ -1557,6 +1559,14 @@ packages:
     resolution: {integrity: sha512-RHxMLp9lnKHGHRng9QFhRCMbYAcVpn69smSGcq3f36xjgVVWThj4qqLbTLlq7Ssj8B+fIQ1EuCEGI2lKsyQeIw==}
     dev: true
 
+  /isomorphic-ws/5.0.0_ws@8.13.0:
+    resolution: {integrity: sha512-muId7Zzn9ywDsyXgTIafTry2sV3nySZeUDe6YedVd1Hvuuep5AsIlqK+XefWpYTyJG5e503F2xIuT2lcU6rCSw==}
+    peerDependencies:
+      ws: '*'
+    dependencies:
+      ws: 8.13.0
+    dev: true
+
   /joycon/3.1.1:
     resolution: {integrity: sha512-34wB/Y7MW7bzjKRjUKTa46I2Z7eV62Rkhva+KkopW7Qvv/OSWBqvkSY7vusOPrNuZcUG3tApvdVgNB8POj3SPw==}
     engines: {node: '>=10'}
@@ -2191,6 +2201,16 @@ packages:
     engines: {node: '>= 0.4'}
     dev: true
 
+  /surrealdb.js/0.5.0:
+    resolution: {integrity: sha512-CpDfCwVnG3ahr2/kUf3i9RgDtLuEzQeU5Zxuhtud5Ijq9abXzkAhS/gcvtSQ9qyZiqSQcp4u7IK3yjnd1OkqKQ==}
+    dependencies:
+      isomorphic-ws: 5.0.0_ws@8.13.0
+      ws: 8.13.0
+    transitivePeerDependencies:
+      - bufferutil
+      - utf-8-validate
+    dev: true
+
   /text-table/0.2.0:
     resolution: {integrity: sha512-N+8UisAXDGk8PFXP4HAzVR9nbfmVJ3zYLAWiTIoqC5v5isinhr+r5uaO8+7r3BMfuNIufIsA7RdpVgacC2cSpw==}
     dev: true
@@ -2403,6 +2423,19 @@ packages:
 
   /wrappy/1.0.2:
     resolution: {integrity: sha512-l4Sp/DRseor9wL6EvV2+TuQn63dMkPjZ/sp9XkghTEbV9KlPS1xUsZ3u7/IQO4wxtcFB4bgpQPRcR3QCvezPcQ==}
+    dev: true
+
+  /ws/8.13.0:
+    resolution: {integrity: sha512-x9vcZYTrFPC7aSIbj7sRCYo7L/Xb8Iy+pW0ng0wt2vCJv7M9HOMy0UoN3rr+IFC7hb7vXoqS+P9ktyLLLhO+LA==}
+    engines: {node: '>=10.0.0'}
+    peerDependencies:
+      bufferutil: ^4.0.1
+      utf-8-validate: '>=5.0.2'
+    peerDependenciesMeta:
+      bufferutil:
+        optional: true
+      utf-8-validate:
+        optional: true
     dev: true
 
   /y18n/5.0.8:
