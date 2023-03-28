@@ -1,7 +1,7 @@
 import type {CompiledQuery, DatabaseConnection, QueryResult} from 'kysely'
 
-import {SurrealDbMultipleStatementQueriesUnsupportedError} from '../errors.js'
-import {SurrealDbHttpDatabaseError, SurrealDbHttpStreamingUnsupportedError} from './http-errors.js'
+import {assertSingleStatementQuery, SurrealDbStreamingUnsupportedError} from '../errors.js'
+import {SurrealDbHttpDatabaseError} from './http-errors.js'
 import type {SurrealDbHttpDialectConfig, SurrealDbHttpRequestHeaders, SurrealDbHttpResponseBody} from './http-types.js'
 
 export class SurrealDbHttpConnection implements DatabaseConnection {
@@ -16,7 +16,7 @@ export class SurrealDbHttpConnection implements DatabaseConnection {
   }
 
   async executeQuery<O>(compiledQuery: CompiledQuery): Promise<QueryResult<O>> {
-    this.#assertSingleStatementQuery(compiledQuery)
+    assertSingleStatementQuery(compiledQuery)
 
     const body = this.#serializeQuery(compiledQuery)
 
@@ -46,14 +46,8 @@ export class SurrealDbHttpConnection implements DatabaseConnection {
     }
   }
 
-  async *streamQuery<O>(compiledQuery: CompiledQuery, chunkSize?: number): AsyncIterableIterator<QueryResult<O>> {
-    throw new SurrealDbHttpStreamingUnsupportedError()
-  }
-
-  #assertSingleStatementQuery(compiledQuery: CompiledQuery): void {
-    if (compiledQuery.sql.match(/.*;.+/i)) {
-      throw new SurrealDbMultipleStatementQueriesUnsupportedError()
-    }
+  async *streamQuery<O>(_: CompiledQuery): AsyncIterableIterator<QueryResult<O>> {
+    throw new SurrealDbStreamingUnsupportedError()
   }
 
   #serializeQuery(compiledQuery: CompiledQuery): string {

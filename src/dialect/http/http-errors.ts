@@ -5,13 +5,6 @@ export class SurrealDbHttpDatabaseError extends Error {
   }
 }
 
-export class SurrealDbHttpStreamingUnsupportedError extends Error {
-  constructor() {
-    super('SurrealDB HTTP endpoints do not support streaming!')
-    this.name = 'SurrealDbHttpStreamingUnsupportedError'
-  }
-}
-
 export class SurrealDbHttpTransactionsUnsupportedError extends Error {
   constructor() {
     super('SurrealDB HTTP endpoints do not support transactions!')
