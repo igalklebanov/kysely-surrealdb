@@ -35,7 +35,13 @@
     "type-check": "tsc --noEmit"
   },
   "peerDependencies": {
-    "kysely": ">= 0.23.5 < 1"
+    "kysely": ">= 0.23.5 < 1",
+    "surrealdb.js": ">= 0.5.0 < 1"
+  },
+  "peerDependenciesMeta": {
+    "surrealdb.js": {
+      "optional": true
+    }
   },
   "devDependencies": {
     "@tsconfig/node16": "^1.0.3",
