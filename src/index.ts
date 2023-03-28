@@ -1,5 +1,5 @@
+export * from './dialect/adapter.js'
 export * from './dialect/errors.js'
-export * from './dialect/http/http-adapter.js'
 export * from './dialect/http/http-dialect.js'
 export * from './dialect/http/http-driver.js'
 export * from './dialect/http/http-errors.js'
