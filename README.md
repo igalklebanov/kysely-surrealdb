@@ -17,31 +17,36 @@ npm i kysely-surrealdb
 #### NPM <7
 
 ```bash
-npm i kysely-surrealdb kysely
+npm i kysely-surrealdb kysely surrealdb.js
 ```
 
 #### Yarn
 
 ```bash
-yarn add kysely-surrealdb kysely
+yarn add kysely-surrealdb kysely surrealdb.js
 ```
 
 #### PNPM
 
 ```bash
-pnpm add kysely-surrealdb kysely
+pnpm add kysely-surrealdb kysely surrealdb.js
 ```
+
+> `surrealdb.js` is an optional peer dependency. It's only needed if you want to use `SurrealDbWebSocketsDialect`. If you don't need it, you can remove `surreal.js` from the install commands above.
 
 ### Deno
 
 This package uses/extends some [Kysely](https://github.com/koskimas/kysely) types and classes, which are imported using its NPM package name -- not a relative file path or CDN url.
+
+`SurrealDbWebSocketsDialect` uses `surrealdb.js` which is imported using its NPM package name -- not a relative file path or CDN url.
 
 To fix that, add an [`import_map.json`](https://deno.land/manual@v1.26.1/linking_to_external_code/import_maps) file.
 
 ```json
 {
   "imports": {
-    "kysely": "https://cdn.jsdelivr.net/npm/kysely@0.23.5/dist/esm/index.js"
+    "kysely": "https://cdn.jsdelivr.net/npm/kysely@0.23.5/dist/esm/index.js",
+    "surrealdb.js": "https://deno.land/x/surrealdb@v0.5.0" // optional - only if you're using `SurrealDbWebSocketsDialect`
   }
 }
 ```
@@ -82,7 +87,7 @@ const db = new Kysely<SurrealDatabase<Database>>({
   dialect: new SurrealDbHttpDialect({
     database: '<database>',
     fetch,
-    hostname: '<hostname>',
+    hostname: '<hostname>', // e.g. 'localhost:8000'
     namespace: '<namespace>',
     password: '<password>',
     username: '<username>',
@@ -90,11 +95,60 @@ const db = new Kysely<SurrealDatabase<Database>>({
 })
 ```
 
-### Web Socket Dialect - Soon<sup>TM</sup>
+### WebSockets Dialect
+
+```ts
+import {Kysely} from 'kysely'
+import {SurrealDatabase, SurrealDbWebSocketsDialect, type SurrealEdge} from 'kysely-surrealdb'
+import Surreal from 'surrealdb.js'
+
+interface Database {
+  person: {
+    first_name: string | null
+    last_name: string | null
+    age: number
+  }
+  own: SurrealEdge<{
+    time: {
+      adopted: string
+    } | null
+  }>
+  pet: {
+    name: string
+    owner_id: string | null
+  }
+}
+
+// with username and password
+const db = new Kysely<SurrealDatabase<Database>>({
+  dialect: new SurrealDbWebSocketsDialect({
+    database: '<database>',
+    Driver: Surreal,
+    hostname: '<hostname>', // e.g. 'localhost:8000'
+    namespace: '<namespace>',
+    password: '<password>',
+    // scope: '<scope>', // optional
+    username: '<username>',
+  }),
+})
+
+// alternatively, with a token
+const dbWithToken = new Kysely<SurrealDatabase<Database>>({
+  dialect: new SurrealDbWebSocketsDialect({
+    database: '<database>',
+    Driver: Surreal,
+    hostname: '<hostname>', // e.g. 'localhost:8000'
+    namespace: '<namespace>',
+    token: '<token>',
+  }),
+})
+```
 
 ### SurrealKysely Query Builder
 
 The awesomeness of Kysely, with some SurrealQL query builders patched in.
+
+> This example uses `SurrealDbHttpDialect` but `SurrealDbWebSocketsDialect` works just as well.
 
 ```ts
 import {SurrealDbHttpDialect, SurrealKysely, type SurrealEdge} from 'kysely-surrealdb'
@@ -140,7 +194,7 @@ await db
 
 #### Supported SurrealQL specific statements:
 
-[create](https://surrealdb.com/docs/surrealql/statements/create), 
+[create](https://surrealdb.com/docs/surrealql/statements/create),
 [if else](https://surrealdb.com/docs/surrealql/statements/ifelse),
 [relate](https://surrealdb.com/docs/surrealql/statements/relate).
 
