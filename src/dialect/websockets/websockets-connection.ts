@@ -68,11 +68,11 @@ export class SurrealDbWebSocketsConnection implements DatabaseConnection {
   }
 
   #extractRows<R>(results: Result[]): R[] {
-    const result = results.pop()
-
-    if (!result) {
-      throw new SurrealDbDatabaseError('No result returned!')
+    if (!results.length) {
+      throw new SurrealDbDatabaseError('No results returned!')
     }
+
+    const result = results[results.length - 1]
 
     const {error, result: rows} = result
 
@@ -80,14 +80,14 @@ export class SurrealDbWebSocketsConnection implements DatabaseConnection {
       throw new SurrealDbDatabaseError(error.message)
     }
 
-    if ('status' in result && result['status'] === 'ERR') {
-      throw new SurrealDbDatabaseError((result as any).detail)
+    if (!('status' in result)) {
+      throw new SurrealDbDatabaseError(JSON.stringify(result))
     }
 
-    if (!Array.isArray(rows)) {
-      throw new SurrealDbDatabaseError(JSON.stringify(rows))
+    if (result['status'] !== 'OK') {
+      throw new SurrealDbDatabaseError(result['detail'])
     }
 
-    return rows
+    return Array.isArray(rows) ? rows : []
   }
 }
