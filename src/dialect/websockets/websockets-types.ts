@@ -15,14 +15,14 @@ export interface SurrealDbWebSocketsDialectConfigBase {
   Driver: typeof Surreal
 
   /**
+   * SurrealDB cluster hostname.
+   */
+  hostname: string
+
+  /**
    * SurrealDB database namespace.
    */
   namespace: string
-
-  /**
-   * SurrealDB database endpoint.
-   */
-  url: string
 }
 
 export interface SurrealDbWebSocketsDialectConfigCredentials {
@@ -34,7 +34,7 @@ export interface SurrealDbWebSocketsDialectConfigCredentials {
   /**
    * SurrealDB authentication scope.
    */
-  scope: string
+  scope?: string
 
   /**
    * SurrealDB username.

@@ -2,6 +2,7 @@ import type {CompiledQuery, DatabaseConnection, QueryResult} from 'kysely'
 import type Surreal from 'surrealdb.js'
 
 import {assertSingleStatementQuery, SurrealDbStreamingUnsupportedError} from '../errors.js'
+import {resolveBasePath} from '../shared.js'
 import type {SurrealDbWebSocketsDialectConfig} from './websockets-types.js'
 
 export class SurrealDbWebSocketsConnection implements DatabaseConnection {
@@ -25,13 +26,13 @@ export class SurrealDbWebSocketsConnection implements DatabaseConnection {
 
     this.#driver = new this.#config.Driver()
 
-    await this.#driver.connect(this.#config.url)
+    const basePath = resolveBasePath(this.#config.hostname)
+
+    await this.#driver.connect(`${basePath}/rpc`)
 
     await ('token' in this.#config
       ? this.#driver.authenticate(this.#config.token)
       : this.#driver.signin({
-          DB: this.#config.database,
-          NS: this.#config.namespace,
           pass: this.#config.password,
           SC: this.#config.scope,
           user: this.#config.username,
