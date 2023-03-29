@@ -28,6 +28,13 @@ export class SurrealDbStreamingUnsupportedError extends Error {
   }
 }
 
+export class SurrealDbDatabaseError extends Error {
+  constructor(message: string = 'Something went wrong!') {
+    super(message)
+    this.name = 'SurrealDbDatabaseError'
+  }
+}
+
 export function assertSingleStatementQuery(compiledQuery: CompiledQuery): void {
   if (compiledQuery.sql.match(/.*;.+/i)) {
     throw new SurrealDbMultipleStatementQueriesUnsupportedError()

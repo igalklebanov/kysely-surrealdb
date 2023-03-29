@@ -1,8 +1,9 @@
 import type {CompiledQuery, DatabaseConnection, QueryResult} from 'kysely'
 import type Surreal from 'surrealdb.js'
+import type {Result} from 'surrealdb.js'
 
-import {assertSingleStatementQuery, SurrealDbStreamingUnsupportedError} from '../errors.js'
-import {resolveBasePath} from '../shared.js'
+import {assertSingleStatementQuery, SurrealDbDatabaseError, SurrealDbStreamingUnsupportedError} from '../errors.js'
+import {resolveBasePath, serializeQuery} from '../shared.js'
 import type {SurrealDbWebSocketsDialectConfig} from './websockets-types.js'
 
 export class SurrealDbWebSocketsConnection implements DatabaseConnection {
@@ -50,9 +51,11 @@ export class SurrealDbWebSocketsConnection implements DatabaseConnection {
 
     assertSingleStatementQuery(compiledQuery)
 
-    const results = await this.#driver.query(compiledQuery.sql, this.#getVarsMap(compiledQuery))
+    const query = serializeQuery(compiledQuery)
 
-    const rows = (results[0].result as R[] | undefined) || []
+    const results = await this.#driver.query(query)
+
+    const rows = this.#extractRows<R>(results)
 
     return {
       numAffectedRows: BigInt(rows.length),
@@ -64,13 +67,27 @@ export class SurrealDbWebSocketsConnection implements DatabaseConnection {
     throw new SurrealDbStreamingUnsupportedError()
   }
 
-  #getVarsMap(compiledQuery: CompiledQuery): Record<string, unknown> {
-    return compiledQuery.parameters.reduce(
-      (acc: Record<string, unknown>, parameter, index) => ({
-        ...acc,
-        [index + 1]: parameter,
-      }),
-      {},
-    )
+  #extractRows<R>(results: Result[]): R[] {
+    const result = results.pop()
+
+    if (!result) {
+      throw new SurrealDbDatabaseError('No result returned!')
+    }
+
+    const {error, result: rows} = result
+
+    if (error) {
+      throw new SurrealDbDatabaseError(error.message)
+    }
+
+    if ('status' in result && result['status'] === 'ERR') {
+      throw new SurrealDbDatabaseError((result as any).detail)
+    }
+
+    if (!Array.isArray(rows)) {
+      throw new SurrealDbDatabaseError(JSON.stringify(rows))
+    }
+
+    return rows
   }
 }
