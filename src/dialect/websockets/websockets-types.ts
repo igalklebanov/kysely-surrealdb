@@ -1,4 +1,4 @@
-import Surreal from 'surrealdb.js'
+import type Surreal from 'surrealdb.js'
 
 export type SurrealDbWebSocketsDialectConfig = SurrealDbWebSocketsDialectConfigBase &
   (SurrealDbWebSocketsDialectConfigCredentials | SurrealDbWebSocketsDialectConfigToken)

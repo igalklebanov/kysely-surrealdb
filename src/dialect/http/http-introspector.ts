@@ -48,7 +48,7 @@ export class SurrealDbHttpIntrospector implements DatabaseIntrospector {
     )
   }
 
-  async getMetadata(options?: DatabaseMetadataOptions | undefined): Promise<DatabaseMetadata> {
+  async getMetadata(_?: DatabaseMetadataOptions | undefined): Promise<DatabaseMetadata> {
     return {tables: await this.getTables()}
   }
 

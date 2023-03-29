@@ -24,7 +24,7 @@ export class SurrealDbWebSocketsIntrospector implements DatabaseIntrospector {
     throw new Error('Unimplemented!')
   }
 
-  async getMetadata(options?: DatabaseMetadataOptions | undefined): Promise<DatabaseMetadata> {
+  async getMetadata(_?: DatabaseMetadataOptions | undefined): Promise<DatabaseMetadata> {
     return {tables: await this.getTables()}
   }
 }
