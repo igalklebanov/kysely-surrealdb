@@ -3,25 +3,30 @@ import {sql} from 'kysely'
 
 import {DIALECTS, dropTables, initTests, prepareTables, testSurrealQl, type TestContext} from './shared'
 
-describe('SurrealKysely.relate(...)', () => {
-  let ctx: TestContext
+DIALECTS.forEach((dialect) => {
+  describe(`${dialect}: SurrealKysely.relate(...)`, () => {
+    let ctx: TestContext
 
-  before(async () => {
-    ctx = initTests()
+    before(async () => {
+      ctx = initTests(dialect)
 
-    await prepareTables(ctx, ['user', 'article', 'company'])
-  })
+      await prepareTables(ctx, ['user', 'article', 'company'])
+    })
 
-  after(async () => {
-    await dropTables(ctx, ['write', 'like', 'company', 'user', 'article'])
-  })
+    beforeEach(async () => {
+      await prepareTables(ctx, ['user', 'article', 'company'])
+    })
 
-  //
-  DIALECTS.forEach((dialect) => {
-    const db = ctx[dialect]
+    afterEach(async () => {
+      await dropTables(ctx, ['write', 'like', 'company', 'user', 'article'])
+    })
+
+    after(async () => {
+      await ctx.db.destroy()
+    })
 
     it('should execute a relate...set query between two specific records.', async () => {
-      const query = db
+      const query = ctx.db
         .relate('write')
         .from('user:tobie')
         .to('article:surreal')
@@ -40,11 +45,11 @@ describe('SurrealKysely.relate(...)', () => {
     })
 
     it('should execute a relate...set query between multiple specific users and devs.', async () => {
-      const query = db
+      const query = ctx.db
         .relate('like')
-        .from(db.selectFrom('company:surrealdb').select('users'))
+        .from(ctx.db.selectFrom('company:surrealdb').select('users'))
         .to(
-          db
+          ctx.db
             .selectFrom('user')
             .where(sql`${sql.ref('tags')} contains ${sql.literal('developer')}`)
             .selectAll(),
@@ -67,7 +72,7 @@ describe('SurrealKysely.relate(...)', () => {
     })
 
     it('should execute a relete...content query between two specific records.', async () => {
-      const query = db
+      const query = ctx.db
         .relate('write')
         .from('user:tobie')
         .to('article:surreal')
@@ -87,7 +92,7 @@ describe('SurrealKysely.relate(...)', () => {
     })
 
     it('should execute a relate...set query between two specific records (table and id in separate arguments).', async () => {
-      const query = db
+      const query = ctx.db
         .relate('write')
         .from('user', 'tobie')
         .to('article', 'surrealql')
@@ -106,7 +111,7 @@ describe('SurrealKysely.relate(...)', () => {
     })
 
     it('should execute a relate...set...return none query between two specific records.', async () => {
-      const query = db
+      const query = ctx.db
         .relate('write')
         .from('user:tobie')
         .to('article:surreal')
@@ -126,7 +131,7 @@ describe('SurrealKysely.relate(...)', () => {
     })
 
     it('should execute a relate...set...return diff query between two specific records.', async () => {
-      const query = db
+      const query = ctx.db
         .relate('write')
         .from('user:tobie')
         .to('article:surreal')
@@ -146,7 +151,7 @@ describe('SurrealKysely.relate(...)', () => {
     })
 
     it('should execute a relate...set...return before query between two specific records.', async () => {
-      const query = db
+      const query = ctx.db
         .relate('write')
         .from('user:tobie')
         .to('article:surreal')
@@ -166,7 +171,7 @@ describe('SurrealKysely.relate(...)', () => {
     })
 
     it('should execute a relate...set...return after query between two specific records.', async () => {
-      const query = db
+      const query = ctx.db
         .relate('write')
         .from('user:tobie')
         .to('article:surreal')
@@ -186,7 +191,7 @@ describe('SurrealKysely.relate(...)', () => {
     })
 
     it('should execute a relate...set...return field query between two specific records.', async () => {
-      const query = db
+      const query = ctx.db
         .relate('write')
         .from('user:tobie')
         .to('article:surreal')
@@ -206,7 +211,7 @@ describe('SurrealKysely.relate(...)', () => {
     })
 
     it('should execute a relate...set...return multiple fields query between two specific records.', async () => {
-      const query = db
+      const query = ctx.db
         .relate('write')
         .from('user:tobie')
         .to('article:surreal')
@@ -227,7 +232,7 @@ describe('SurrealKysely.relate(...)', () => {
     })
 
     it('should execute a relate...set query between multiple specific records and a single outbound record.', async () => {
-      const query = db
+      const query = ctx.db
         .relate('like')
         .from(['user:tobie', 'user:igal'])
         .to('user:moshe')
@@ -246,7 +251,7 @@ describe('SurrealKysely.relate(...)', () => {
     })
 
     it('should execute a relate...set query between a single specific record and multiple specific records.', async () => {
-      const query = db
+      const query = ctx.db
         .relate('like')
         .from('user:tobie')
         .to(['user:moshe', 'user:igal'])
@@ -265,7 +270,7 @@ describe('SurrealKysely.relate(...)', () => {
     })
 
     it('should execute a relate...set query between multiple specific records and multiple specific records.', async () => {
-      const query = db
+      const query = ctx.db
         .relate('write')
         .from(['user:tobie', 'user:igal'])
         .to(['article:surreal', 'article:surrealql'])

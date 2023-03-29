@@ -59,35 +59,37 @@ export interface Account {
 }
 
 export interface TestContext {
-  http: SurrealKysely<Database>
-  websockets: SurrealKysely<Database>
+  db: SurrealKysely<Database>
 }
 
 export const DIALECTS = ['http', 'websockets'] as const
 
-export function initTests(): TestContext {
+const BASE_CONFIG = {
+  database: 'test',
+  hostname: 'localhost:8000',
+  namespace: 'test',
+  password: 'root',
+  username: 'root',
+}
+
+export function initTests(dialect: typeof DIALECTS[number]): TestContext {
   return {
-    http: new SurrealKysely<Database>({
-      dialect: new SurrealDbHttpDialect({
-        database: 'test',
-        fetch: getFetch(),
-        hostname: 'localhost:8000',
-        namespace: 'test',
-        password: 'root',
-        username: 'root',
-      }),
-    }),
-    websockets: new SurrealKysely<Database>({
-      dialect: new SurrealDbWebSocketsDialect({
-        database: 'test',
-        Driver: Surreal,
-        namespace: 'test',
-        password: 'root',
-        scope: 'test',
-        url: 'https://localhost:8000/rpc',
-        username: 'root',
-      }),
-    }),
+    db: {
+      http: () =>
+        new SurrealKysely<Database>({
+          dialect: new SurrealDbHttpDialect({
+            ...BASE_CONFIG,
+            fetch: getFetch(),
+          }),
+        }),
+      websockets: () =>
+        new SurrealKysely<Database>({
+          dialect: new SurrealDbWebSocketsDialect({
+            ...BASE_CONFIG,
+            Driver: Surreal,
+          }),
+        }),
+    }[dialect](),
   }
 }
 
@@ -115,6 +117,8 @@ export function testSurrealQl(actual: Compilable, expected: {parameters: unknown
 }
 
 export async function prepareTables(ctx: TestContext, tables: ReadonlyArray<keyof Database>): Promise<void> {
+  await dropTables(ctx, tables)
+
   return await tables.reduce(async (acc, table) => {
     switch (table) {
       case 'account':
@@ -146,12 +150,12 @@ export async function dropTables(ctx: TestContext, tables: ReadonlyArray<keyof D
 }
 
 async function dropTable(ctx: TestContext, table: keyof Database) {
-  await sql`remove table ${sql.table(table)}`.execute(ctx.http)
+  await sql`remove table ${sql.table(table)}`.execute(ctx.db)
 }
 
 function insertUsers(ctx: TestContext) {
   return async () => {
-    await ctx.http
+    await ctx.db
       .insertInto('user')
       .values([
         {id: 'tobie', nickname: 'Tobie', tags: ['developer']},
@@ -164,7 +168,7 @@ function insertUsers(ctx: TestContext) {
 
 function insertArticles(ctx: TestContext) {
   return async () => {
-    await ctx.http
+    await ctx.db
       .insertInto('article')
       .values([
         {id: 'surreal', title: 'Surreal'},
@@ -176,7 +180,7 @@ function insertArticles(ctx: TestContext) {
 
 function insertCompanies(ctx: TestContext) {
   return async () => {
-    await ctx.http
+    await ctx.db
       .insertInto('company')
       .values([{id: 'surrealdb', users: sql`user:igal`}])
       .execute()
@@ -185,7 +189,7 @@ function insertCompanies(ctx: TestContext) {
 
 function insertPeople(ctx: TestContext) {
   return async () => {
-    await ctx.http
+    await ctx.db
       .insertInto('person')
       .values([{age: 10}, {age: 21}, {age: 30}, {age: 65}])
       .execute()
@@ -194,7 +198,7 @@ function insertPeople(ctx: TestContext) {
 
 function insertAccounts(ctx: TestContext) {
   return async () => {
-    await ctx.http
+    await ctx.db
       .insertInto('account')
       .values([
         {id: 'account:123', name: 'Account 123'},

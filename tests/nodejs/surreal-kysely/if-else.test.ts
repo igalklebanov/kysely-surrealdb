@@ -3,22 +3,25 @@ import {sql, UpdateResult} from 'kysely'
 
 import {DIALECTS, dropTables, initTests, prepareTables, testSurrealQl, type Account, type TestContext} from './shared'
 
-describe('SurrealKysely.ifThen(...)', () => {
-  let ctx: TestContext
+DIALECTS.forEach((dialect) => {
+  describe(`${dialect}: SurrealKysely.ifThen(...)`, () => {
+    let ctx: TestContext
 
-  before(async () => {
-    ctx = initTests()
+    before(async () => {
+      ctx = initTests(dialect)
+    })
 
-    await prepareTables(ctx, ['account', 'person'])
-  })
+    beforeEach(async () => {
+      await prepareTables(ctx, ['account', 'person'])
+    })
 
-  after(async () => {
-    await dropTables(ctx, ['account', 'person'])
-  })
+    afterEach(async () => {
+      await dropTables(ctx, ['account', 'person'])
+    })
 
-  //
-  DIALECTS.forEach((dialect) => {
-    const db = ctx[dialect]
+    after(async () => {
+      await ctx.db.destroy()
+    })
 
     it('should execute an if...then...elseif...then...else...end query.', async () => {
       const auth = {account: 'account:123'}
@@ -28,8 +31,8 @@ describe('SurrealKysely.ifThen(...)', () => {
         {scope: 'user', resultCount: 1},
         {scope: 'moderator', resultCount: 0},
       ]) {
-        const query = db
-          .ifThen(sql`${scope} = ${sql.literal('admin')}`, db.selectFrom('account').selectAll())
+        const query = ctx.db
+          .ifThen(sql`${scope} = ${sql.literal('admin')}`, ctx.db.selectFrom('account').selectAll())
           .elseIfThen(sql`${scope} = ${sql.literal('user')}`, sql<Account[]>`(select * from ${auth}.account)`)
           .else(sql<[]>`[]`)
           .end()
@@ -50,8 +53,8 @@ describe('SurrealKysely.ifThen(...)', () => {
     })
 
     it('should execute an update...set...if...then...elseif...else...end query.', async () => {
-      const query = db.updateTable('person').set({
-        railcard: db
+      const query = ctx.db.updateTable('person').set({
+        railcard: ctx.db
           .ifThen(sql`${sql.ref('age')} <= 10`, sql`${sql.literal('junior')}`.$castTo<'junior'>())
           .elseIfThen(sql`${sql.ref('age')} <= 21`, sql.literal('student').$castTo<'student'>())
           .elseIfThen(sql`${sql.ref('age')} >= 65`, sql.literal('senior').$castTo<'senior'>())
