@@ -2,14 +2,14 @@ import type {DatabaseIntrospector, Dialect, DialectAdapter, Driver, Kysely, Quer
 
 import {SurrealDbQueryCompiler} from '../../query-compiler/query-compiler.js'
 import {SurrealDbAdapter} from '../adapter.js'
-import {SurrealDbHttpDriver} from './http-driver.js'
-import {SurrealDbHttpIntrospector} from './http-introspector.js'
-import type {SurrealDbHttpDialectConfig} from './http-types.js'
+import {SurrealDbWebSocketsDriver} from './websockets-driver.js'
+import {SurrealDbWebSocketsIntrospector} from './websockets-introspector.js'
+import type {SurrealDbWebSocketsDialectConfig} from './websockets-types.js'
 
-export class SurrealDbHttpDialect implements Dialect {
-  readonly #config: SurrealDbHttpDialectConfig
+export class SurrealDbWebSocketsDialect implements Dialect {
+  readonly #config: SurrealDbWebSocketsDialectConfig
 
-  constructor(config: SurrealDbHttpDialectConfig) {
+  constructor(config: SurrealDbWebSocketsDialectConfig) {
     this.#config = config
   }
 
@@ -18,11 +18,11 @@ export class SurrealDbHttpDialect implements Dialect {
   }
 
   createDriver(): Driver {
-    return new SurrealDbHttpDriver(this.#config)
+    return new SurrealDbWebSocketsDriver(this.#config)
   }
 
   createIntrospector(db: Kysely<any>): DatabaseIntrospector {
-    return new SurrealDbHttpIntrospector(db)
+    return new SurrealDbWebSocketsIntrospector(db)
   }
 
   createQueryCompiler(): QueryCompiler {

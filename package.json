@@ -35,7 +35,13 @@
     "type-check": "tsc --noEmit"
   },
   "peerDependencies": {
-    "kysely": ">= 0.23.5 < 1"
+    "kysely": ">= 0.23.5 < 1",
+    "surrealdb.js": ">= 0.5.0 < 1"
+  },
+  "peerDependenciesMeta": {
+    "surrealdb.js": {
+      "optional": true
+    }
   },
   "devDependencies": {
     "@tsconfig/node16": "^1.0.3",
@@ -59,6 +65,7 @@
     "prettier": "^2.7.1",
     "prettier-plugin-organize-imports": "^3.1.1",
     "prettier-plugin-pkg": "^0.17.1",
+    "surrealdb.js": "^0.5.0",
     "tsup": "^6.2.3",
     "typescript": "^4.8.4",
     "undici": "^5.11.0"

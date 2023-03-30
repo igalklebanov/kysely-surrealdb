@@ -1,6 +1,7 @@
 import type {DatabaseConnection, Driver} from 'kysely'
 
 import {encodeToBase64} from '../../util/encode-to-base64.js'
+import {resolveBasePath} from '../shared.js'
 import {SurrealDbHttpConnection} from './http-connection.js'
 import {SurrealDbHttpTransactionsUnsupportedError} from './http-errors.js'
 import type {SurrealDbHttpDialectConfig, SurrealDbHttpRequestHeaders} from './http-types.js'
@@ -12,7 +13,7 @@ export class SurrealDbHttpDriver implements Driver {
 
   constructor(config: SurrealDbHttpDialectConfig) {
     this.#config = config
-    this.#basePath = this.#resolveBasePath()
+    this.#basePath = resolveBasePath(config.hostname)
     this.#requestHeaders = this.#createRequestHeaders()
   }
 
@@ -42,13 +43,6 @@ export class SurrealDbHttpDriver implements Driver {
 
   async destroy(): Promise<void> {
     // noop
-  }
-
-  #resolveBasePath(): string {
-    const {hostname} = this.#config
-    const protocol = hostname.startsWith('localhost') ? 'http' : 'https'
-
-    return `${protocol}://${hostname}`
   }
 
   #createRequestHeaders(): SurrealDbHttpRequestHeaders & Record<string, string> {
