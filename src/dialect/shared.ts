@@ -13,16 +13,18 @@ export function serializeQuery(compiledQuery: CompiledQuery): string {
     return `${sql};`
   }
 
-  return [
-    ...parameters.map(
-      (parameter, index) =>
-        `let $${index + 1} = ${
-          typeof parameter === 'string' && parameter.startsWith('SURREALQL::')
-            ? parameter.replace(/^SURREALQL::(\(.+\))/, '$1')
-            : JSON.stringify(parameter)
-        }`,
-    ),
-    sql,
-    '',
-  ].join(';')
+  return (
+    [
+      ...parameters.map(
+        (parameter, index) =>
+          `let $${index + 1} = ${
+            typeof parameter === 'string' && parameter.startsWith('SURREALQL::')
+              ? parameter.replace(/^SURREALQL::(\(.+\))/, '$1')
+              : JSON.stringify(parameter)
+          }`,
+      ),
+      sql,
+      '',
+    ].join(';') + ';'
+  )
 }

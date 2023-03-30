@@ -1,4 +1,4 @@
-import {CompiledQuery, DatabaseConnection, Driver} from 'kysely'
+import {CompiledQuery, type DatabaseConnection, type Driver} from 'kysely'
 
 import {SurrealDbWebSocketsConnection} from './websockets-connection.js'
 import type {SurrealDbWebSocketsDialectConfig} from './websockets-types.js'
@@ -16,19 +16,27 @@ export class SurrealDbWebSocketsDriver implements Driver {
   }
 
   async acquireConnection(): Promise<DatabaseConnection> {
-    return (this.#connection ||= await new SurrealDbWebSocketsConnection(this.#config).connect())
+    return (this.#connection ||= await this.#connect())
   }
 
-  async beginTransaction(connection: DatabaseConnection): Promise<void> {
+  async beginTransaction(connection: SurrealDbWebSocketsConnection): Promise<void> {
+    // swap existing non-transactional connection for a new one,
+    // use the old one for the transaction
+    this.#connection = await this.#connect()
+
     await connection.executeQuery(CompiledQuery.raw('begin transaction'))
   }
 
-  async commitTransaction(connection: DatabaseConnection): Promise<void> {
+  async commitTransaction(connection: SurrealDbWebSocketsConnection): Promise<void> {
     await connection.executeQuery(CompiledQuery.raw('commit transaction'))
+
+    connection.close()
   }
 
-  async rollbackTransaction(connection: DatabaseConnection): Promise<void> {
+  async rollbackTransaction(connection: SurrealDbWebSocketsConnection): Promise<void> {
     await connection.executeQuery(CompiledQuery.raw('cancel transaction'))
+
+    connection.close()
   }
 
   async releaseConnection(): Promise<void> {
@@ -37,5 +45,9 @@ export class SurrealDbWebSocketsDriver implements Driver {
 
   async destroy(): Promise<void> {
     this.#connection?.close()
+  }
+
+  #connect() {
+    return new SurrealDbWebSocketsConnection(this.#config).connect()
   }
 }

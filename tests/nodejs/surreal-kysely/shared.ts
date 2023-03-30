@@ -1,10 +1,13 @@
-import {expect} from 'chai'
+import {expect, use} from 'chai'
+import chaiAsPromised from 'chai-as-promised'
 import {sql, type ColumnType, type Compilable, type RawBuilder} from 'kysely'
 import nodeFetch from 'node-fetch'
 import Surreal from 'surrealdb.js'
 import {fetch as undiciFetch} from 'undici'
 
 import {SurrealDbHttpDialect, SurrealDbWebSocketsDialect, SurrealKysely, type SurrealEdge} from '../../../src'
+
+use(chaiAsPromised)
 
 export interface Database {
   person: Person

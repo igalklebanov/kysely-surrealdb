@@ -69,7 +69,7 @@ export class SurrealDbWebSocketsConnection implements DatabaseConnection {
 
   #extractRows<R>(results: Result[]): R[] {
     if (!results.length) {
-      throw new SurrealDbDatabaseError('No results returned!')
+      return []
     }
 
     const result = results[results.length - 1]
