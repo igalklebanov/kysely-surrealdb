@@ -17,6 +17,7 @@ export interface Database {
   company: Company
   like: SurrealEdge<Like>
   account: Account
+  temperature: Temperature
 }
 
 interface Person {
@@ -30,7 +31,6 @@ interface Person {
 }
 
 interface User {
-  id: string
   nickname: string | null
   tags: string[] | null
 }
@@ -45,9 +45,13 @@ interface Write {
   >
 }
 
-interface Article {}
+interface Article {
+  author: string | null
+  time: string | null
+}
 
 interface Company {
+  name: string | null
   users: any
 }
 
@@ -59,6 +63,14 @@ interface Like {
 
 export interface Account {
   name: string
+}
+
+interface Temperature {
+  celsius: number | null
+  date: string | null
+  location: string | null
+  temperature: number | null
+  time: string | null
 }
 
 export interface TestContext {
