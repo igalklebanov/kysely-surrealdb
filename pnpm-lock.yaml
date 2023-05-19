@@ -16,13 +16,13 @@ specifiers:
   eslint-config-prettier: ^8.5.0
   eslint-plugin-import: ^2.26.0
   eslint-plugin-prettier: ^4.2.1
-  kysely: ^0.23.5
+  kysely: ^0.24.2
   mocha: ^10.0.0
   node-fetch: ^2
   prettier: ^2.7.1
   prettier-plugin-organize-imports: ^3.1.1
   prettier-plugin-pkg: ^0.17.1
-  surrealdb.js: ^0.5.0
+  surrealdb.js: ^0.7.3
   tsup: ^6.2.3
   typescript: ^4.8.4
   undici: ^5.11.0
@@ -43,13 +43,13 @@ devDependencies:
   eslint-config-prettier: 8.5.0_eslint@8.25.0
   eslint-plugin-import: 2.26.0_zb5prbqp7qzcgafjm73dfpyyvm
   eslint-plugin-prettier: 4.2.1_hvbqyfstm4urdpm6ffpwfka4e4
-  kysely: 0.23.5
+  kysely: 0.24.2
   mocha: 10.0.0
   node-fetch: 2.6.7
   prettier: 2.7.1
   prettier-plugin-organize-imports: 3.1.1_dmjzcauo3cshxeipj7bv64ktgm
   prettier-plugin-pkg: 0.17.1_prettier@2.7.1
-  surrealdb.js: 0.5.0
+  surrealdb.js: 0.7.3
   tsup: 6.2.3_typescript@4.8.4
   typescript: 4.8.4
   undici: 5.11.0
@@ -1559,14 +1559,6 @@ packages:
     resolution: {integrity: sha512-RHxMLp9lnKHGHRng9QFhRCMbYAcVpn69smSGcq3f36xjgVVWThj4qqLbTLlq7Ssj8B+fIQ1EuCEGI2lKsyQeIw==}
     dev: true
 
-  /isomorphic-ws/5.0.0_ws@8.13.0:
-    resolution: {integrity: sha512-muId7Zzn9ywDsyXgTIafTry2sV3nySZeUDe6YedVd1Hvuuep5AsIlqK+XefWpYTyJG5e503F2xIuT2lcU6rCSw==}
-    peerDependencies:
-      ws: '*'
-    dependencies:
-      ws: 8.13.0
-    dev: true
-
   /joycon/3.1.1:
     resolution: {integrity: sha512-34wB/Y7MW7bzjKRjUKTa46I2Z7eV62Rkhva+KkopW7Qvv/OSWBqvkSY7vusOPrNuZcUG3tApvdVgNB8POj3SPw==}
     engines: {node: '>=10'}
@@ -1598,8 +1590,8 @@ packages:
       minimist: 1.2.7
     dev: true
 
-  /kysely/0.23.5:
-    resolution: {integrity: sha512-TH+b56pVXQq0tsyooYLeNfV11j6ih7D50dyN8tkM0e7ndiUH28Nziojiog3qRFlmEj9XePYdZUrNJ2079Qjdow==}
+  /kysely/0.24.2:
+    resolution: {integrity: sha512-+7eaTJNUYm2yRq1x+lEOZc+78TO35dTZ9b0dh49+Z9CTt2byMSbMiOKpwPlOyCAaHD4kILkAYWYZNywFlmBwRA==}
     engines: {node: '>=14.0.0'}
     dev: true
 
@@ -2201,10 +2193,10 @@ packages:
     engines: {node: '>= 0.4'}
     dev: true
 
-  /surrealdb.js/0.5.0:
-    resolution: {integrity: sha512-CpDfCwVnG3ahr2/kUf3i9RgDtLuEzQeU5Zxuhtud5Ijq9abXzkAhS/gcvtSQ9qyZiqSQcp4u7IK3yjnd1OkqKQ==}
+  /surrealdb.js/0.7.3:
+    resolution: {integrity: sha512-cvir1Cr8lyMkWRgSetn1qIIGmzkSZjeKS6r4kPKWctkH8BFCwj0PSO74lnuLcHqc5e80Rs9IJgKGq9C9hKdNBw==}
     dependencies:
-      isomorphic-ws: 5.0.0_ws@8.13.0
+      unws: 0.2.3_ws@8.13.0
       ws: 8.13.0
     transitivePeerDependencies:
       - bufferutil
@@ -2354,6 +2346,15 @@ packages:
     engines: {node: '>=12.18'}
     dependencies:
       busboy: 1.6.0
+    dev: true
+
+  /unws/0.2.3_ws@8.13.0:
+    resolution: {integrity: sha512-59MJAkUoFCncPvNQjwAN9rvaLjKNMDUMEjLZ1Fnor+qI+KoTAXtJnFWYsh0fq8L3eVfrt6dDYhGfgF19t/jpHw==}
+    engines: {node: '>=16.14.0'}
+    peerDependencies:
+      ws: '*'
+    dependencies:
+      ws: 8.13.0
     dev: true
 
   /uri-js/4.4.1:
