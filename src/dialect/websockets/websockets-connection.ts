@@ -1,10 +1,9 @@
 import type {CompiledQuery, DatabaseConnection, QueryResult} from 'kysely'
-import type Surreal from 'surrealdb.js'
-import type {Result} from 'surrealdb.js'
+import type {Surreal} from 'surrealdb.js'
 
 import {assertSingleStatementQuery, SurrealDbDatabaseError, SurrealDbStreamingUnsupportedError} from '../errors.js'
 import {resolveBasePath, serializeQuery} from '../shared.js'
-import type {SurrealDbWebSocketsDialectConfig} from './websockets-types.js'
+import type {SurrealDbJsQueryResult, SurrealDbWebSocketsDialectConfig} from './websockets-types.js'
 
 export class SurrealDbWebSocketsConnection implements DatabaseConnection {
   readonly #config: SurrealDbWebSocketsDialectConfig
@@ -29,7 +28,7 @@ export class SurrealDbWebSocketsConnection implements DatabaseConnection {
 
     const basePath = resolveBasePath(this.#config.hostname)
 
-    await this.#driver.connect(`${basePath}/rpc`)
+    this.#driver.connect(`${basePath}/rpc`)
 
     await ('token' in this.#config
       ? this.#driver.authenticate(this.#config.token)
@@ -67,26 +66,22 @@ export class SurrealDbWebSocketsConnection implements DatabaseConnection {
     throw new SurrealDbStreamingUnsupportedError()
   }
 
-  #extractRows<R>(results: Result[]): R[] {
-    if (!results.length) {
-      return []
-    }
-
+  #extractRows<R>(results: SurrealDbJsQueryResult[]): R[] {
     const result = results[results.length - 1]
 
-    const {error, result: rows} = result
-
-    if (error) {
-      throw new SurrealDbDatabaseError(error.message)
+    if (!result) {
+      return []
     }
 
     if (!('status' in result)) {
       throw new SurrealDbDatabaseError(JSON.stringify(result))
     }
 
-    if (result['status'] !== 'OK') {
-      throw new SurrealDbDatabaseError(result['detail'])
+    if (result.status !== 'OK') {
+      throw new SurrealDbDatabaseError(result.detail)
     }
+
+    const {result: rows} = result
 
     return Array.isArray(rows) ? rows : []
   }

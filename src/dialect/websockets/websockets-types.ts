@@ -48,3 +48,19 @@ export interface SurrealDbWebSocketsDialectConfigToken {
    */
   token: string
 }
+
+export type SurrealDbJsQueryResult<T = unknown> = SurrealDbJsQueryResultOk<T> | SurrealDbJsQueryResultErr
+
+export type SurrealDbJsQueryResultOk<T> = {
+  status: 'OK'
+  time: string
+  result: T
+  detail?: never
+}
+
+export type SurrealDbJsQueryResultErr = {
+  status: 'ERR'
+  time: string
+  result?: never
+  detail: string
+}
