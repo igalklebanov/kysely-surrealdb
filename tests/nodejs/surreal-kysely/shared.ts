@@ -52,7 +52,7 @@ interface Article {
 
 interface Company {
   name: string | null
-  users: any
+  users: string[] | null
 }
 
 interface Like {
@@ -197,7 +197,7 @@ function insertCompanies(ctx: TestContext) {
   return async () => {
     await ctx.db
       .insertInto('company')
-      .values([{id: 'surrealdb', users: sql`user:igal`}])
+      .values([{id: 'surrealdb', users: sql`[user:igal]`}])
       .execute()
   }
 }

@@ -30,12 +30,10 @@ DIALECTS.forEach((dialect) => {
         .relate('write')
         .from('user:tobie')
         .to('article:surreal')
-        .set({
-          'time.written': sql`time::now()`,
-        })
+        .set({'time.written': sql`time::now()`})
 
       testSurrealQl(query, {
-        sql: 'relate user:tobie -> write -> article:surreal set time.written = time::now()',
+        sql: 'relate user:tobie->write->article:surreal set time.written = time::now()',
         parameters: [],
       })
 
@@ -44,7 +42,7 @@ DIALECTS.forEach((dialect) => {
       expect(actual).to.be.an('array').which.has.lengthOf(1)
     })
 
-    // This query started failing on newer image version. Posted a question in official discord server.
+    // FIXME: this query started failing on newer image version. posted a question in official discord server.
     it.skip('should execute a relate...set query between multiple specific users and devs.', async () => {
       const query = ctx.db
         .relate('like')
@@ -52,15 +50,13 @@ DIALECTS.forEach((dialect) => {
         .to(
           ctx.db
             .selectFrom('user')
-            .where(sql`${sql.ref('tags')} contains ${sql.literal('developer')}`)
+            .where((eb) => eb.cmpr('tags', sql`contains`, sql.lit<any>('developer')))
             .selectAll(),
         )
-        .set({
-          'time.connected': sql`time::now()`,
-        })
+        .set({'time.connected': sql`time::now()`})
 
       testSurrealQl(query, {
-        sql: 'relate $1 -> like -> $2 set time.connected = time::now()',
+        sql: 'relate $1->like->$2 set time.connected = time::now()',
         parameters: [
           'SURREALQL::(select users from company:surrealdb)',
           "SURREALQL::(select * from user where tags contains 'developer')",
@@ -81,7 +77,7 @@ DIALECTS.forEach((dialect) => {
 
       testSurrealQl(query, {
         sql: [
-          'relate user:tobie -> write -> article:surreal',
+          'relate user:tobie->write->article:surreal',
           "content {source: 'Apple notes', tags: ['notes', 'markdown'], time: {written: time::now()}}",
         ],
         parameters: [],
@@ -97,12 +93,10 @@ DIALECTS.forEach((dialect) => {
         .relate('write')
         .from('user', 'tobie')
         .to('article', 'surrealql')
-        .set({
-          'time.written': sql`time::now()`,
-        })
+        .set({'time.written': sql`time::now()`})
 
       testSurrealQl(query, {
-        sql: 'relate user:tobie -> write -> article:surrealql set time.written = time::now()',
+        sql: 'relate user:tobie->write->article:surrealql set time.written = time::now()',
         parameters: [],
       })
 
@@ -116,13 +110,11 @@ DIALECTS.forEach((dialect) => {
         .relate('write')
         .from('user:tobie')
         .to('article:surreal')
-        .set({
-          'time.written': sql`time::now()`,
-        })
+        .set({'time.written': sql`time::now()`})
         .return('none')
 
       testSurrealQl(query, {
-        sql: 'relate user:tobie -> write -> article:surreal set time.written = time::now() return none',
+        sql: 'relate user:tobie->write->article:surreal set time.written = time::now() return none',
         parameters: [],
       })
 
@@ -136,13 +128,11 @@ DIALECTS.forEach((dialect) => {
         .relate('write')
         .from('user:tobie')
         .to('article:surreal')
-        .set({
-          'time.written': sql`time::now()`,
-        })
+        .set({'time.written': sql`time::now()`})
         .return('diff')
 
       testSurrealQl(query, {
-        sql: 'relate user:tobie -> write -> article:surreal set time.written = time::now() return diff',
+        sql: 'relate user:tobie->write->article:surreal set time.written = time::now() return diff',
         parameters: [],
       })
 
@@ -156,13 +146,11 @@ DIALECTS.forEach((dialect) => {
         .relate('write')
         .from('user:tobie')
         .to('article:surreal')
-        .set({
-          'time.written': sql`time::now()`,
-        })
+        .set({'time.written': sql`time::now()`})
         .return('before')
 
       testSurrealQl(query, {
-        sql: 'relate user:tobie -> write -> article:surreal set time.written = time::now() return before',
+        sql: 'relate user:tobie->write->article:surreal set time.written = time::now() return before',
         parameters: [],
       })
 
@@ -176,13 +164,11 @@ DIALECTS.forEach((dialect) => {
         .relate('write')
         .from('user:tobie')
         .to('article:surreal')
-        .set({
-          'time.written': sql`time::now()`,
-        })
+        .set({'time.written': sql`time::now()`})
         .return('after')
 
       testSurrealQl(query, {
-        sql: 'relate user:tobie -> write -> article:surreal set time.written = time::now() return after',
+        sql: 'relate user:tobie->write->article:surreal set time.written = time::now() return after',
         parameters: [],
       })
 
@@ -196,13 +182,11 @@ DIALECTS.forEach((dialect) => {
         .relate('write')
         .from('user:tobie')
         .to('article:surreal')
-        .set({
-          'time.written': sql`time::now()`,
-        })
+        .set({'time.written': sql`time::now()`})
         .return('time')
 
       testSurrealQl(query, {
-        sql: 'relate user:tobie -> write -> article:surreal set time.written = time::now() return time',
+        sql: 'relate user:tobie->write->article:surreal set time.written = time::now() return time',
         parameters: [],
       })
 
@@ -216,14 +200,11 @@ DIALECTS.forEach((dialect) => {
         .relate('write')
         .from('user:tobie')
         .to('article:surreal')
-        .set({
-          source: 'Samsung notes',
-          'time.written': sql`time::now()`,
-        })
+        .set({source: 'Samsung notes', 'time.written': sql`time::now()`})
         .return(['source', 'time'])
 
       testSurrealQl(query, {
-        sql: 'relate user:tobie -> write -> article:surreal set source = $1, time.written = time::now() return source, time',
+        sql: 'relate user:tobie->write->article:surreal set source = $1, time.written = time::now() return source, time',
         parameters: ['Samsung notes'],
       })
 
@@ -237,12 +218,10 @@ DIALECTS.forEach((dialect) => {
         .relate('like')
         .from(['user:tobie', 'user:igal'])
         .to('user:moshe')
-        .set({
-          'time.connected': sql`time::now()`,
-        })
+        .set({'time.connected': sql`time::now()`})
 
       testSurrealQl(query, {
-        sql: 'relate [user:tobie, user:igal] -> like -> user:moshe set time.connected = time::now()',
+        sql: 'relate [user:tobie, user:igal]->like->user:moshe set time.connected = time::now()',
         parameters: [],
       })
 
@@ -256,12 +235,10 @@ DIALECTS.forEach((dialect) => {
         .relate('like')
         .from('user:tobie')
         .to(['user:moshe', 'user:igal'])
-        .set({
-          'time.connected': sql`time::now()`,
-        })
+        .set({'time.connected': sql`time::now()`})
 
       testSurrealQl(query, {
-        sql: 'relate user:tobie -> like -> [user:moshe, user:igal] set time.connected = time::now()',
+        sql: 'relate user:tobie->like->[user:moshe, user:igal] set time.connected = time::now()',
         parameters: [],
       })
 
@@ -275,12 +252,10 @@ DIALECTS.forEach((dialect) => {
         .relate('write')
         .from(['user:tobie', 'user:igal'])
         .to(['article:surreal', 'article:surrealql'])
-        .set({
-          'time.written': sql`time::now()`,
-        })
+        .set({'time.written': sql`time::now()`})
 
       testSurrealQl(query, {
-        sql: 'relate [user:tobie, user:igal] -> write -> [article:surreal, article:surrealql] set time.written = time::now()',
+        sql: 'relate [user:tobie, user:igal]->write->[article:surreal, article:surrealql] set time.written = time::now()',
         parameters: [],
       })
 

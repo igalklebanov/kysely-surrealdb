@@ -122,13 +122,13 @@ export class SurrealDbQueryCompiler extends DefaultQueryCompiler {
     if (from) {
       this.append(' ')
       this.visitNode(from as any)
-      this.append(' -> ')
+      this.append('->')
     }
 
     this.visitNode(node.edge)
 
     if (to) {
-      this.append(' -> ')
+      this.append('->')
       this.visitNode(to as any)
     }
 
