@@ -36,7 +36,7 @@
   },
   "peerDependencies": {
     "kysely": ">= 0.23.5 < 1",
-    "surrealdb.js": ">= 0.5.0 < 1"
+    "surrealdb.js": "^0.5.0"
   },
   "peerDependenciesMeta": {
     "surrealdb.js": {
