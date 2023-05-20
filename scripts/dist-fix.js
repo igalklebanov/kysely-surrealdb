@@ -1,5 +1,6 @@
 const {mkdir, readdir, rename, rm, writeFile, copyFile, readFile, unlink, move} = require('fs-extra')
 const path = require('node:path')
+const packageJson = require('../package.json')
 
 ;(async () => {
   const distPath = path.join(__dirname, '../dist')
@@ -14,6 +15,7 @@ const path = require('node:path')
     readdir(distEsmHelpersPath),
     readdir(distHelpersPath),
     rm(distCjsPath, {force: true, recursive: true}),
+    writeDummyExportsFiles(),
   ])
 
   await Promise.all([
@@ -57,8 +59,33 @@ function addReferenceTypesTripleDash(folderPath, folderContentPaths) {
 
       const denoFriendlyFileContents = [`/// <reference types="${dtsFilePath}" />`, fileContents].join('\n')
 
-      await unlink(filePath)
-
       await writeFile(filePath, denoFriendlyFileContents)
     })
+}
+
+async function writeDummyExportsFiles() {
+  const rootPath = path.join(__dirname, '..')
+
+  await Promise.all(
+    Object.entries(packageJson.exports)
+      .filter(([exportPath]) => exportPath !== '.')
+      .flatMap(async ([exportPath, exportConfig]) => {
+        const [, ...dummyPathParts] = exportPath.split('/')
+        const dummyFilename = dummyPathParts.length > 1 ? dummyPathParts.pop() : 'index'
+
+        const [, ...destinationFolders] = exportConfig.require.split('/').slice(0, -1)
+
+        const dummyFolderPathFromRoot = path.join(rootPath, ...dummyPathParts)
+
+        await mkdir(dummyFolderPathFromRoot, {recursive: true})
+
+        const dummyFilePathFromRoot = path.join(dummyFolderPathFromRoot, dummyFilename)
+        const actualPath = path.relative(dummyFolderPathFromRoot, path.join(rootPath, ...destinationFolders))
+
+        return [
+          writeFile(dummyFilePathFromRoot + '.js', `module.exports = require('${actualPath}')`),
+          writeFile(dummyFilePathFromRoot + '.d.ts', `export * from '${actualPath}'`),
+        ]
+      }),
+  )
 }
