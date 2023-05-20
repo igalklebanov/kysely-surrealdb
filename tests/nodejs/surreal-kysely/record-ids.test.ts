@@ -1,6 +1,7 @@
 import {expect} from 'chai'
 import {sql} from 'kysely'
-import {DIALECTS, dropTables, initTests, TestContext, testSurrealQl} from './shared'
+
+import {DIALECTS, dropTables, initTests, testSurrealQl, type TestContext} from './shared'
 
 DIALECTS.forEach((dialect) => {
   describe(`${dialect}: Record IDs`, () => {

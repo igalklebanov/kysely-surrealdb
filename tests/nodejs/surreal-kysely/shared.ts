@@ -28,6 +28,9 @@ interface Person {
   interests: string[] | null
   railcard: string | null
   age: number | null
+  children: any[] | null
+  newsletter: boolean | null
+  interested: boolean | null
 }
 
 interface User {
