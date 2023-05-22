@@ -1,7 +1,7 @@
 import type {CompiledQuery} from 'kysely'
 
 export function resolveBasePath(hostname: string): string {
-  const protocol = hostname.startsWith('localhost') ? 'http' : 'https'
+  const protocol = hostname.startsWith('localhost') || hostname.startsWith('127.0.0.1') ? 'http' : 'https'
 
   return `${protocol}://${hostname}`
 }
