@@ -45,7 +45,7 @@ To fix that, add an [`import_map.json`](https://deno.land/manual@v1.26.1/linking
 ```json
 {
   "imports": {
-    "kysely": "https://cdn.jsdelivr.net/npm/kysely@0.23.5/dist/esm/index.js",
+    "kysely": "npm:kysely@^0.25.0",
     "surrealdb.js": "https://deno.land/x/surrealdb@v0.5.0" // optional - only if you're using `SurrealDbWebSocketsDialect`
   }
 }
